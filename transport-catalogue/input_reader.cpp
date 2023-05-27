@@ -1,6 +1,8 @@
 #include "input_reader.h"
 
-namespace catalogue {
+namespace catalogue::input {
+
+namespace detail {
 
 std::vector<std::string> SplitStops(std::string_view str, std::string delim) {
     std::vector<std::string> result;
@@ -19,6 +21,8 @@ std::vector<std::string> SplitStops(std::string_view str, std::string delim) {
         }
     }
     return result;
+}
+
 }
 
 void InputReader::ProcessQueries(TransportCatalogue& cat) {
@@ -66,6 +70,8 @@ void InputReader::AddStopQuery(const std::string& line) {
 }
 
 void InputReader::AddBusQuery(const std::string& line) {
+    using namespace std::literals;
+
     bool isStraight = true;
     std::string delim = "-"s;
 
@@ -77,7 +83,7 @@ void InputReader::AddBusQuery(const std::string& line) {
     size_t semicolon_pos = line.find(':');
     size_t name_begin = line.find_first_not_of(' ');
     std::string name = line.substr(name_begin, semicolon_pos - name_begin);
-    std::vector<std::string> stops = SplitStops(line.substr(semicolon_pos + 1), delim);
+    std::vector<std::string> stops = detail::SplitStops(line.substr(semicolon_pos + 1), delim);
 
     size_t len = stops.size();
 

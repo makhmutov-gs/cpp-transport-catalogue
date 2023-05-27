@@ -6,19 +6,41 @@
 
 namespace catalogue {
 
-using namespace std::literals;
-
-template <typename StreamIn, typename StreamOut>
+template <typename StreamOut>
 class StatReader {
-
 public:
+    template <typename StreamIn>
+    StatReader(StreamIn& in, StreamOut& out) : out_(out) {
+        ReadQueries(in);
+    }
 
+    void ProcessQueries(const TransportCatalogue& cat) {
+        for (const auto& query : queries_) {
+            switch (query.second) {
+                case QueryType::BUS:
+                    ProcessBusQuery(query.first, cat);
+                    break;
+                case QueryType::STOP:
+                    ProcessStopQuery(query.first, cat);
+                    break;
+            }
+        }
+    }
+
+private:
     enum class QueryType {
-        Bus,
-        Stop
+        BUS,
+        STOP
     };
 
-    StatReader(StreamIn& in, StreamOut& out, TransportCatalogue cat) : cat_(cat), out_(out) {
+    StreamOut& out_;
+
+    std::vector<std::pair<std::string, QueryType>> queries_;
+
+    template <typename StreamIn>
+    void ReadQueries(StreamIn& in) {
+        using namespace std::literals;
+
         size_t query_count;
         in >> query_count;
 
@@ -37,28 +59,12 @@ public:
                 AddStopQuery(line);
             }
         }
-
-        for (const auto& query : queries_) {
-            switch (query.second) {
-                case QueryType::Bus:
-                    ProcessBusQuery(query.first);
-                    break;
-                case QueryType::Stop:
-                    ProcessStopQuery(query.first);
-                    break;
-            }
-
-        }
     }
 
-private:
-    TransportCatalogue cat_;
-    StreamOut& out_;
+    void ProcessBusQuery(const std::string& bus_name, const TransportCatalogue& cat) {
+        using namespace std::literals;
 
-    std::vector<std::pair<std::string, QueryType>> queries_;
-
-    void ProcessBusQuery(const std::string& bus_name) {
-        auto bus = cat_.GetBus(bus_name);
+        auto bus = cat.GetBus(bus_name);
         if (bus) {
             out_ << std::setprecision(6);
             out_ << "Bus "s << bus->name << ": "s
@@ -71,8 +77,10 @@ private:
         }
     }
 
-    void ProcessStopQuery(const std::string& stop_name) {
-        auto bus_list = cat_.GetBusesByStop(stop_name);
+    void ProcessStopQuery(const std::string& stop_name, const TransportCatalogue& cat) {
+        using namespace std::literals;
+
+        auto bus_list = cat.GetBusesByStop(stop_name);
         if (bus_list) {
             if (bus_list.value().empty()) {
                 out_ << "Stop "s << stop_name << ": no buses\n"s;
@@ -89,17 +97,15 @@ private:
         }
     }
 
-
     void AddBusQuery(const std::string& line) {
         std::string name = line.substr(line.find_first_not_of(' '));
-        queries_.push_back({name, QueryType::Bus});
+        queries_.push_back({name, QueryType::BUS});
     }
 
     void AddStopQuery(const std::string& line) {
         std::string name = line.substr(line.find_first_not_of(' '));
-         queries_.push_back({name, QueryType::Stop});
+         queries_.push_back({name, QueryType::STOP});
     }
-
 
 };
 

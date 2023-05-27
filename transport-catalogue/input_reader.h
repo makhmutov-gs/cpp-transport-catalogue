@@ -3,27 +3,29 @@
 #include <string>
 #include "transport_catalogue.h"
 
-namespace catalogue {
+namespace catalogue::input {
+
+namespace detail {
 
 std::vector<std::string> SplitStops(std::string_view str, std::string delim);
 
-using namespace std::literals;
+}
+
 class InputReader {
 
 public:
     template <typename Stream>
     InputReader(Stream& in);
 
-    template <typename Stream>
-    void Read(Stream& in);
-
     void ProcessQueries(TransportCatalogue& cat);
-
 
 private:
     std::vector<Stop> stop_queries_;
     std::vector<BusInput> bus_queries_;
     std::unordered_map<std::string, std::unordered_map<std::string, double>> stop_to_stop_distances_;
+
+    template <typename Stream>
+    void ReadQueries(Stream& in);
 
     void AddStopQuery(const std::string& line);
 
@@ -32,11 +34,13 @@ private:
 
 template <typename Stream>
 InputReader::InputReader(Stream& in) {
-    Read(in);
+    ReadQueries(in);
 }
 
 template <typename Stream>
-void InputReader::Read(Stream& in) {
+void InputReader::ReadQueries(Stream& in) {
+    using namespace std::literals;
+
     size_t query_count;
     in >> query_count;
 
