@@ -4,6 +4,8 @@
 #include <string>
 #include "transport_catalogue.h"
 
+namespace catalogue {
+
 using namespace std::literals;
 
 template <typename StreamIn, typename StreamOut>
@@ -56,7 +58,7 @@ private:
     std::vector<std::pair<std::string, QueryType>> queries_;
 
     void ProcessBusQuery(const std::string& bus_name) {
-        auto bus = cat_.GetBusInfo(bus_name);
+        auto bus = cat_.GetBus(bus_name);
         if (bus) {
             out_ << std::setprecision(6);
             out_ << "Bus "s << bus->name << ": "s
@@ -70,7 +72,7 @@ private:
     }
 
     void ProcessStopQuery(const std::string& stop_name) {
-        auto bus_list = cat_.GetBusListByStop(stop_name);
+        auto bus_list = cat_.GetBusesByStop(stop_name);
         if (bus_list) {
             if (bus_list.value().empty()) {
                 out_ << "Stop "s << stop_name << ": no buses\n"s;
@@ -100,3 +102,5 @@ private:
 
 
 };
+
+}

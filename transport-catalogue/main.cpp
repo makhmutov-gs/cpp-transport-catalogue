@@ -6,7 +6,7 @@
 #include "transport_catalogue.h"
 
 int main() {
-
+    using namespace catalogue;
     TransportCatalogue cat;
     InputReader reader;
     reader.Read(std::cin);

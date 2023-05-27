@@ -3,6 +3,7 @@
 #include <string>
 #include "transport_catalogue.h"
 
+namespace catalogue {
 
 std::vector<std::string> SplitStops(std::string_view str, std::string delim) {
     std::vector<std::string> result;
@@ -125,3 +126,5 @@ private:
 
 
 };
+
+}
