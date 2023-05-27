@@ -12,7 +12,7 @@ int main() {
 
     reader.ProcessQueries(cat);
 
-    StatReader statReader(std::cin, std::cout);
+    output::StatReader statReader(std::cin, std::cout);
 
     statReader.ProcessQueries(cat);
 }

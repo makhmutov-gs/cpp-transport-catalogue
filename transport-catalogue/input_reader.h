@@ -14,31 +14,31 @@ std::vector<std::string> SplitStops(std::string_view str, std::string delim);
 class InputReader {
 
 public:
-    template <typename Stream>
-    InputReader(Stream& in);
+    template <typename StreamIn>
+    InputReader(StreamIn& in);
 
     void ProcessQueries(TransportCatalogue& cat);
 
 private:
     std::vector<Stop> stop_queries_;
     std::vector<BusInput> bus_queries_;
-    std::unordered_map<std::string, std::unordered_map<std::string, double>> stop_to_stop_distances_;
+    std::unordered_map<std::string, std::unordered_map<std::string, double>> stop_distances_;
 
-    template <typename Stream>
-    void ReadQueries(Stream& in);
+    template <typename StreamIn>
+    void ReadQueries(StreamIn& in);
 
     void AddStopQuery(const std::string& line);
 
     void AddBusQuery(const std::string& line);
 };
 
-template <typename Stream>
-InputReader::InputReader(Stream& in) {
+template <typename StreamIn>
+InputReader::InputReader(StreamIn& in) {
     ReadQueries(in);
 }
 
-template <typename Stream>
-void InputReader::ReadQueries(Stream& in) {
+template <typename StreamIn>
+void InputReader::ReadQueries(StreamIn& in) {
     using namespace std::literals;
 
     size_t query_count;

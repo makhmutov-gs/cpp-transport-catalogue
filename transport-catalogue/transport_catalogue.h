@@ -21,7 +21,6 @@ struct Bus {
     std::string name;
     std::vector<const Stop*> stops;
     size_t unique_stops;
-    double geo_length;
     double road_length;
     double curvature;
 };
@@ -46,7 +45,10 @@ public:
 
     void AddStop(const Stop& stop);
 
-    void AddStopToStopDistance(const std::pair<std::string, std::unordered_map<std::string, double>>& distances);
+    void AddStopDistances(
+        const std::string& name,
+        const std::unordered_map<std::string, double>& distances
+    );
 
     void AddBus(const BusInput& bus_input);
 
@@ -64,9 +66,7 @@ private:
     std::unordered_map<std::pair<const Stop*, const Stop*>, double, StopPairHash> road_distances_;
 
     double CalcGeoRouteLength(const std::vector<const Stop*>& stops);
-
     double CalcRoadRouteLength(const std::vector<const Stop*>& stops) const;
-
 };
 
 }

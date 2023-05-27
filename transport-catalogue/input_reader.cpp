@@ -30,8 +30,8 @@ void InputReader::ProcessQueries(TransportCatalogue& cat) {
         cat.AddStop(stop);
     }
 
-    for (auto& stop_to_stop : stop_to_stop_distances_) {
-        cat.AddStopToStopDistance(stop_to_stop);
+    for (const auto& [stop, distances] : stop_distances_) {
+        cat.AddStopDistances(stop, distances);
     }
 
     for (auto& bus : bus_queries_) {
@@ -65,7 +65,7 @@ void InputReader::AddStopQuery(const std::string& line) {
         comma_after = line.find(',', to_pos);
         size_t stop_name_begin = line.find_first_not_of(' ', to_pos + 3);
         std::string stop_name = line.substr(stop_name_begin, comma_after - stop_name_begin);
-        stop_to_stop_distances_[name].insert({stop_name, meters});
+        stop_distances_[name].insert({stop_name, meters});
     }
 }
 
