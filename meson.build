@@ -1,4 +1,4 @@
-project('transport_catalogue', 'cpp', default_options: ['cpp_std=c++20', 'warning_level=3'])
+project('transport_catalogue', 'cpp', default_options: ['cpp_std=c++20', 'warning_level=3', 'werror=true'])
 
 src = [
     'transport-catalogue/geo.h',
