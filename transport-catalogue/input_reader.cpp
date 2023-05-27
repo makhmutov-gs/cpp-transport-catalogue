@@ -85,12 +85,9 @@ void InputReader::AddBusQuery(const std::string& line) {
     std::string name = line.substr(name_begin, semicolon_pos - name_begin);
     std::vector<std::string> stops = detail::SplitStops(line.substr(semicolon_pos + 1), delim);
 
-    size_t len = stops.size();
-
     if (isStraight) {
-        for (size_t i = 0; i < len - 1; ++i) {
-            stops.push_back(stops[len - 2 - i]);
-        }
+        std::vector<std::string> tmp{stops.rbegin() + 1, stops.rend()};
+        stops.insert(stops.end(), tmp.begin(), tmp.end());
     }
 
     bus_queries_.push_back({name, stops});
