@@ -8,7 +8,6 @@
 #include <utility>
 #include <set>
 #include <optional>
-#include "geo.h"
 
 namespace catalogue {
 

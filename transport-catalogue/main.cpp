@@ -8,20 +8,9 @@
 int main() {
     using namespace catalogue;
     TransportCatalogue cat;
-    InputReader reader;
-    reader.Read(std::cin);
+    InputReader reader(std::cin);
 
-    for (auto& stop : reader.GetStopQueries()) {
-        cat.AddStop(stop);
-    }
-
-    for (auto& stop_to_stop : reader.GetStopToStopDistances()) {
-        cat.AddStopToStopDistance(stop_to_stop);
-    }
-
-    for (auto& bus : reader.GetBusQueries()) {
-        cat.AddBus(bus);
-    }
+    reader.ProcessQueries(cat);
 
     StatReader statReader(std::cin, std::cout, cat);
 }
