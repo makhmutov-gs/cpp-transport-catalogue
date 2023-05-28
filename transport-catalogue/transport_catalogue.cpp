@@ -1,5 +1,4 @@
 #include "transport_catalogue.h"
-#include "geo.h"
 
 namespace catalogue {
 
@@ -65,8 +64,8 @@ double TransportCatalogue::CalcGeoRouteLength(const std::vector<const Stop*>& st
 
         if (geo_distances_.count(stop_pair) == 0) {
             geo_distances_[stop_pair] = geo::ComputeDistance(
-                {stops[i]->lat, stops[i]->lon},
-                {stops[i+1]->lat, stops[i+1]->lon}
+                {stops[i]->coords},
+                {stops[i+1]->coords}
             );
         }
         result += geo_distances_.at(stop_pair);

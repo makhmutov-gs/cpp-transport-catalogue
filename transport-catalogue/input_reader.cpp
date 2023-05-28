@@ -50,12 +50,12 @@ void InputReader::AddStopQuery(const std::string& line) {
     size_t comma_after = line.find(',', comma_pos + 1);
 
     std::string lat_str = line.substr(lat_begin, comma_pos - lat_begin);
-    std::string lon_str = line.substr(comma_pos + 1, comma_after - comma_pos - 1);
+    std::string lng_str = line.substr(comma_pos + 1, comma_after - comma_pos - 1);
 
     double lat = std::stod(lat_str);
-    double lon = std::stod(lon_str);
+    double lng = std::stod(lng_str);
 
-    stop_queries_.push_back({name, lat, lon});
+    stop_queries_.push_back({name, {lat, lng}});
 
     while (comma_after != std::string::npos) {
         size_t m_pos = line.find('m', comma_after);

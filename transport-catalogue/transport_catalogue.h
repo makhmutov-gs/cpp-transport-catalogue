@@ -8,13 +8,13 @@
 #include <utility>
 #include <set>
 #include <optional>
+#include "geo.h"
 
 namespace catalogue {
 
 struct Stop {
     std::string name;
-    double lat;
-    double lon;
+    geo::Coordinates coords;
 };
 
 struct Bus {
