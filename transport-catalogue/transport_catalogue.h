@@ -45,9 +45,10 @@ public:
 
     void AddStop(const Stop& stop);
 
-    void AddStopDistances(
-        const std::string& name,
-        const std::unordered_map<std::string, double>& distances
+    void SetRoadDistance(
+        const std::string& from,
+        const std::string& to,
+        double distance
     );
 
     void AddBus(const BusInput& bus_input);

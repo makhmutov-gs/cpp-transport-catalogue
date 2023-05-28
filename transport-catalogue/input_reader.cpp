@@ -30,8 +30,10 @@ void InputReader::ProcessQueries(TransportCatalogue& cat) {
         cat.AddStop(stop);
     }
 
-    for (const auto& [stop, distances] : stop_distances_) {
-        cat.AddStopDistances(stop, distances);
+    for (const auto& [from, distances_to_stops] : stop_distances_) {
+        for (const auto& [to, distance] : distances_to_stops) {
+            cat.SetRoadDistance(from, to, distance);
+        }
     }
 
     for (auto& bus : bus_queries_) {

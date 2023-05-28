@@ -8,16 +8,14 @@ void TransportCatalogue::AddStop(const Stop& stop) {
     stop_to_buses_[&stops_.back()] = {};
 }
 
-void TransportCatalogue::AddStopDistances(
-    const std::string& name,
-    const std::unordered_map<std::string, double>& distances
+void TransportCatalogue::SetRoadDistance(
+    const std::string& from,
+    const std::string& to,
+    double distance
 ) {
-    auto first_stop_ptr = stopname_to_stop_[name];
-
-    for (const auto& [second_stop, meters] : distances) {
-        auto second_stop_ptr = stopname_to_stop_[second_stop];
-        road_distances_[{first_stop_ptr, second_stop_ptr}] = meters;
-    }
+    road_distances_[
+        {stopname_to_stop_[from], stopname_to_stop_[to]}
+    ] = distance;
 }
 
 void TransportCatalogue::AddBus(const BusInput& bus_input) {
