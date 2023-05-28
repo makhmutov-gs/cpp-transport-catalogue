@@ -14,5 +14,5 @@ int main() {
 
     output::StatReader statReader(std::cin, std::cout);
 
-    statReader.ProcessQueries(cat);
+    statReader.PrintQueries(cat);
 }

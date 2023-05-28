@@ -3,20 +3,20 @@
 
 namespace catalogue::output {
 
-void StatReader::ProcessQueries(const TransportCatalogue& cat) {
+void StatReader::PrintQueries(const TransportCatalogue& cat) {
     for (const auto& query : queries_) {
         switch (query.type) {
             case QueryType::BUS:
-                ProcessBusQuery(query.name, cat);
+                PrintBusQuery(query.name, cat);
                 break;
             case QueryType::STOP:
-                ProcessStopQuery(query.name, cat);
+                PrintStopQuery(query.name, cat);
                 break;
         }
     }
 }
 
-void StatReader::ProcessBusQuery(const std::string& bus_name, const TransportCatalogue& cat) {
+void StatReader::PrintBusQuery(const std::string& bus_name, const TransportCatalogue& cat) {
     using namespace std::literals;
 
     auto bus = cat.GetBus(bus_name);
@@ -32,7 +32,7 @@ void StatReader::ProcessBusQuery(const std::string& bus_name, const TransportCat
     }
 }
 
-void StatReader::ProcessStopQuery(const std::string& stop_name, const TransportCatalogue& cat) {
+void StatReader::PrintStopQuery(const std::string& stop_name, const TransportCatalogue& cat) {
     using namespace std::literals;
 
     auto bus_list = cat.GetBusesByStop(stop_name);

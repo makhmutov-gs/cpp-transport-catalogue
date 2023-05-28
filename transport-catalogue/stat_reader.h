@@ -10,7 +10,7 @@ public:
     template <typename StreamIn>
     StatReader(StreamIn& in, std::ostream& out);
 
-    void ProcessQueries(const TransportCatalogue& cat);
+    void PrintQueries(const TransportCatalogue& cat);
 
 private:
     enum class QueryType {
@@ -30,9 +30,9 @@ private:
     template <typename StreamIn>
     void ReadQueries(StreamIn& in);
 
-    void ProcessBusQuery(const std::string& bus_name, const TransportCatalogue& cat);
+    void PrintBusQuery(const std::string& bus_name, const TransportCatalogue& cat);
 
-    void ProcessStopQuery(const std::string& stop_name, const TransportCatalogue& cat);
+    void PrintStopQuery(const std::string& stop_name, const TransportCatalogue& cat);
 
     void AddQuery(const std::string& line, QueryType type);
 };
