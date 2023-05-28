@@ -20,8 +20,13 @@ public:
     void ProcessQueries(TransportCatalogue& cat);
 
 private:
+    struct BusQuery {
+        std::string name;
+        std::vector<std::string> stops;
+    };
+
     std::vector<Stop> stop_queries_;
-    std::vector<BusInput> bus_queries_;
+    std::vector<BusQuery> bus_queries_;
     std::unordered_map<std::string, std::unordered_map<std::string, double>> stop_distances_;
 
     template <typename StreamIn>

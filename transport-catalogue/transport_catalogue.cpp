@@ -18,17 +18,16 @@ void TransportCatalogue::SetRoadDistance(
     ] = distance;
 }
 
-void TransportCatalogue::AddBus(const BusInput& bus_input) {
+void TransportCatalogue::AddBus(
+    const std::string& name,
+    const std::vector<std::string>& stops
+) {
     Bus bus;
-    bus.name = std::move(bus_input.name);
+    bus.name = std::move(name);
 
-    for (auto& stop : bus_input.stops) {
-        bus.stops.push_back(stopname_to_stop_[stop]);
+    for (const auto& stop_name : stops) {
+        bus.stops.push_back(stopname_to_stop_[stop_name]);
     }
-
-    bus.road_length = CalcRoadRouteLength(bus.stops);
-    bus.curvature = bus.road_length /  CalcGeoRouteLength(bus.stops);
-    bus.unique_stops = std::set(bus.stops.begin(), bus.stops.end()).size();
 
     buses_.push_back(std::move(bus));
 
@@ -39,12 +38,23 @@ void TransportCatalogue::AddBus(const BusInput& bus_input) {
     busname_to_bus_[buses_.back().name] = &buses_.back();
 }
 
-const Bus* TransportCatalogue::GetBus(const std::string& name) const {
+std::optional<BusInfo> TransportCatalogue::GetBusInfo(const std::string& name) {
     if (busname_to_bus_.count(name) == 0) {
-        return nullptr;
+        return std::nullopt;
     }
 
-    return busname_to_bus_.at(name);
+    const Bus* bus = busname_to_bus_.at(name);
+
+    size_t unique_stops = std::set(bus->stops.begin(), bus->stops.end()).size();
+    double road_length = CalcRoadRouteLength(bus->stops);
+    double curvature = road_length / CalcGeoRouteLength(bus->stops);
+
+    return BusInfo{
+        bus->stops.size(),
+        unique_stops,
+        road_length,
+        curvature
+    };
 }
 
 std::optional<std::set<std::string_view>> TransportCatalogue::GetBusesByStop(const std::string& name) const {

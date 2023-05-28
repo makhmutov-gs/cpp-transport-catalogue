@@ -3,7 +3,7 @@
 
 namespace catalogue::output {
 
-void StatReader::PrintQueries(const TransportCatalogue& cat) {
+void StatReader::PrintQueries(TransportCatalogue& cat) {
     for (const auto& query : queries_) {
         switch (query.type) {
             case QueryType::BUS:
@@ -16,17 +16,18 @@ void StatReader::PrintQueries(const TransportCatalogue& cat) {
     }
 }
 
-void StatReader::PrintBusQuery(const std::string& bus_name, const TransportCatalogue& cat) {
+void StatReader::PrintBusQuery(const std::string& bus_name, TransportCatalogue& cat) {
     using namespace std::literals;
 
-    auto bus = cat.GetBus(bus_name);
-    if (bus) {
+    auto bus_info = cat.GetBusInfo(bus_name);
+
+    if (bus_info) {
         out_ << std::setprecision(6);
-        out_ << "Bus "s << bus->name << ": "s
-            << bus->stops.size() << " stops on route, "s
-            << bus->unique_stops << " unique stops, "s
-            << bus->road_length << " route length, "s
-            << bus->curvature << " curvature\n"s;
+        out_ << "Bus "s << bus_name << ": "s
+            << bus_info.value().stop_count << " stops on route, "s
+            << bus_info.value().unique_stops << " unique stops, "s
+            << bus_info.value().road_length << " route length, "s
+            << bus_info.value().curvature << " curvature\n"s;
     } else {
         out_ << "Bus "s << bus_name << ": not found\n"s;
     }

@@ -37,7 +37,7 @@ void InputReader::ProcessQueries(TransportCatalogue& cat) {
     }
 
     for (auto& bus : bus_queries_) {
-        cat.AddBus(bus);
+        cat.AddBus(bus.name, bus.stops);
     }
 }
 

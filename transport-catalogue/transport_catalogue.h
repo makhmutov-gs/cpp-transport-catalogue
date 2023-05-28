@@ -17,17 +17,16 @@ struct Stop {
     geo::Coordinates coords;
 };
 
-struct Bus {
-    std::string name;
-    std::vector<const Stop*> stops;
+struct BusInfo {
+    size_t stop_count;
     size_t unique_stops;
     double road_length;
     double curvature;
 };
 
-struct BusInput {
+struct Bus {
     std::string name;
-    std::vector<std::string> stops;
+    std::vector<const Stop*> stops;
 };
 
 struct StopPairHash {
@@ -51,9 +50,12 @@ public:
         double distance
     );
 
-    void AddBus(const BusInput& bus_input);
+    void AddBus(
+        const std::string& name,
+        const std::vector<std::string>& stops
+    );
 
-    const Bus* GetBus(const std::string& name) const;
+    std::optional<BusInfo> GetBusInfo(const std::string& name);
 
     std::optional<std::set<std::string_view>> GetBusesByStop(const std::string& name) const;
 
