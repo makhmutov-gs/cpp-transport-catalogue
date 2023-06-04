@@ -1,4 +1,5 @@
 #include "json_reader.h"
+#include <sstream>
 
 namespace catalogue::reader {
 
@@ -8,7 +9,7 @@ inline const std::string BASE_REQUESTS = "base_requests";
 inline const std::string STAT_REQUESTS = "stat_requests";
 inline const std::string RENDER_SETTINGS = "render_settings";
 
-JsonReader::JsonReader(std::istream& in, bool read_output_queries=false) {
+JsonReader::JsonReader(std::istream& in, bool read_output_queries) {
     ReadDocument(in, read_output_queries);
 }
 
@@ -28,7 +29,7 @@ void JsonReader::ProcessInQueries(TransportCatalogue& cat) {
     }
 }
 
-void JsonReader::PrintOutQueries(TransportCatalogue& cat, std::ostream& out) {
+void JsonReader::PrintOutQueries(TransportCatalogue& cat, const requests::RequestHandler& handler, std::ostream& out) {
     json::Array to_print;
     for (const auto& query : out_queries_) {
         switch (query.type) {
@@ -37,6 +38,9 @@ void JsonReader::PrintOutQueries(TransportCatalogue& cat, std::ostream& out) {
                 break;
             case OutQueryType::BUS:
                 to_print.push_back(FormBusQuery(query, cat));
+                break;
+            case OutQueryType::MAP:
+                to_print.push_back(FormMapQuery(query, handler));
                 break;
         }
     }
@@ -77,12 +81,19 @@ void JsonReader::ReadOutputQueries(const json::Array& out_queries) {
     for (const auto& query : out_queries) {
         int id = query.AsMap().at("id").AsInt();
         std::string type = query.AsMap().at("type"s).AsString();
-        std::string name = query.AsMap().at("name"s).AsString();
 
         if (type == "Stop"s) {
-            out_queries_.push_back({id, OutQueryType::STOP, name});
+            out_queries_.push_back(
+                {id, OutQueryType::STOP, query.AsMap().at("name"s).AsString()}
+            );
         } else if (type == "Bus"s) {
-            out_queries_.push_back({id, OutQueryType::BUS, name});
+            out_queries_.push_back(
+                {id, OutQueryType::BUS, query.AsMap().at("name"s).AsString()}
+            );
+        } else if (type == "Map"s) {
+            out_queries_.push_back(
+                {id, OutQueryType::MAP, {}}
+            );
         }
     }
 }
@@ -175,7 +186,7 @@ void JsonReader::AddBusQuery(const json::Dict& query) {
     bus_queries_.push_back({name, stops, is_roundtrip});
 }
 
-json::Dict JsonReader::FormStopQuery(const OutQuery& query, const TransportCatalogue& cat) {
+json::Dict JsonReader::FormStopQuery(const OutQuery& query, const TransportCatalogue& cat) const {
     auto bus_list = cat.GetBusesByStop(query.name);
     if (bus_list) {
         std::set<std::string> buses_string;
@@ -196,7 +207,7 @@ json::Dict JsonReader::FormStopQuery(const OutQuery& query, const TransportCatal
     }
 }
 
-json::Dict JsonReader::FormBusQuery(const OutQuery& query, TransportCatalogue& cat) {
+json::Dict JsonReader::FormBusQuery(const OutQuery& query, TransportCatalogue& cat) const {
     auto bus_info = cat.GetBusInfo(query.name);
 
     if (bus_info) {
@@ -213,6 +224,21 @@ json::Dict JsonReader::FormBusQuery(const OutQuery& query, TransportCatalogue& c
             {"request_id"s, query.id}
         };
     }
+}
+
+json::Dict JsonReader::FormMapQuery(
+    const OutQuery& query,
+    const requests::RequestHandler& handler
+) const {
+    svg::Document doc = handler.RenderMap();
+    std::ostringstream ostr;
+
+    doc.Render(ostr);
+
+    return json::Dict{
+        {"map"s, ostr.str()},
+        {"request_id"s, query.id}
+    };
 }
 
 

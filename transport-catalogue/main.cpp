@@ -12,13 +12,14 @@ int main() {
 
     TransportCatalogue cat;
 
-    JsonReader reader(std::cin, false);
+    JsonReader reader(std::cin);
 
     reader.ProcessInQueries(cat);
-    //reader.PrintOutQueries(cat, std::cout);
 
     MapRenderer renderer(reader.GetRenderSettings());
     RequestHandler handler(cat, renderer);
 
-    handler.RenderMap().Render(std::cout);
+    reader.PrintOutQueries(cat, handler, std::cout);
+
+    //handler.RenderMap().Render(std::cout);
 }

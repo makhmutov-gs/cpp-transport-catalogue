@@ -14,7 +14,7 @@ private:
     std::vector<geo::Coordinates> GetCoordsOnRoutes() const;
     std::vector<const Bus*> GetSortedBuses() const;
     std::vector<const Stop*> GetSortedStopsOnRoutes() const;
-    // RequestHandler использует агрегацию объектов "Транспортный Справочник" и "Визуализатор Карты"
+
     const TransportCatalogue& cat_;
     renderer::MapRenderer& renderer_;
 };

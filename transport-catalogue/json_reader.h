@@ -2,15 +2,20 @@
 #include "json.h"
 #include "transport_catalogue.h"
 #include "map_renderer.h"
+#include "request_handler.h"
 
 namespace catalogue::reader {
 
 class JsonReader {
 public:
-    JsonReader(std::istream& in, bool read_output_queries);
+    JsonReader(std::istream& in, bool read_output_queries=true);
 
     void ProcessInQueries(TransportCatalogue& cat);
-    void PrintOutQueries(TransportCatalogue& cat, std::ostream& out);
+    void PrintOutQueries(
+        TransportCatalogue& cat,
+        const requests::RequestHandler& handler,
+        std::ostream& out
+    );
     renderer::Settings GetRenderSettings() const;
 
 private:
@@ -22,7 +27,8 @@ private:
 
     enum class OutQueryType {
         BUS,
-        STOP
+        STOP,
+        MAP,
     };
 
     struct OutQuery {
@@ -46,8 +52,9 @@ private:
     void AddStopQuery(const json::Dict& query);
     void AddBusQuery(const json::Dict& query);
 
-    json::Dict FormStopQuery(const OutQuery& query, const TransportCatalogue& cat);
-    json::Dict FormBusQuery(const OutQuery& query, TransportCatalogue& cat);
+    json::Dict FormStopQuery(const OutQuery& query, const TransportCatalogue& cat) const;
+    json::Dict FormBusQuery(const OutQuery& query, TransportCatalogue& cat) const;
+    json::Dict FormMapQuery(const OutQuery& query, const requests::RequestHandler& handler) const;
 };
 
 }
