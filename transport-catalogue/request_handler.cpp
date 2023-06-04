@@ -9,9 +9,15 @@ RequestHandler::RequestHandler(
   , renderer_(renderer) {}
 
 svg::Document RequestHandler::RenderMap() const {
-    std::vector<geo::Coordinates> coords = GetCoordsOnRoutes();
+    auto coords = GetCoordsOnRoutes();
+    auto sorted_buses = GetSortedBuses();
 
-    return renderer_.RenderRoutes(GetCoordsOnRoutes(), GetSortedBuses());
+    svg::Document result;
+    for (const auto& route : renderer_.RenderRoutes(coords, sorted_buses)) {
+        result.Add(route);
+    }
+
+    return result;
 }
 
 std::vector<geo::Coordinates> RequestHandler::GetCoordsOnRoutes() const {

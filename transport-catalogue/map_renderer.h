@@ -102,7 +102,7 @@ class MapRenderer {
 public:
     MapRenderer(Settings settings);
 
-    svg::Document RenderRoutes(
+    std::vector<svg::Polyline> RenderRoutes(
         const std::vector<geo::Coordinates>& coords,
         const std::vector<const Bus*>& sorted_buses
     ) const;

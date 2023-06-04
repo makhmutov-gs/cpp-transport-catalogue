@@ -7,7 +7,7 @@ MapRenderer::MapRenderer(Settings settings)
 {
 }
 
-svg::Document MapRenderer::RenderRoutes(
+std::vector<svg::Polyline> MapRenderer::RenderRoutes(
     const std::vector<geo::Coordinates>& coords,
     const std::vector<const Bus*>& sorted_buses
 ) const {
@@ -19,7 +19,7 @@ svg::Document MapRenderer::RenderRoutes(
         settings_.padding
     );
 
-    svg::Document result;
+    std::vector<svg::Polyline> result;
 
     for (size_t i = 0; i < sorted_buses.size(); ++i) {
         svg::Polyline line;
@@ -33,7 +33,7 @@ svg::Document MapRenderer::RenderRoutes(
             line.AddPoint(projector(stop->coords));
         }
 
-        result.Add(line);
+        result.push_back(line);
     }
 
     return result;
