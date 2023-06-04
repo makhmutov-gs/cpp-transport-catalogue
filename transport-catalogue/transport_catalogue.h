@@ -55,6 +55,10 @@ public:
         const std::vector<std::string>& stops
     );
 
+    const std::deque<Bus>& GetBuses() const {
+        return buses_;
+    }
+
     std::optional<BusInfo> GetBusInfo(const std::string& name);
 
     std::optional<std::set<std::string_view>> GetBusesByStop(const std::string& name) const;

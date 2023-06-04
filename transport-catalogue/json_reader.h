@@ -1,15 +1,17 @@
 #pragma once
 #include "json.h"
 #include "transport_catalogue.h"
+#include "map_renderer.h"
 
 namespace catalogue::reader {
 
 class JsonReader {
 public:
-    JsonReader(std::istream& in);
+    JsonReader(std::istream& in, bool read_output_queries);
 
     void ProcessInQueries(TransportCatalogue& cat);
     void PrintOutQueries(TransportCatalogue& cat, std::ostream& out);
+    renderer::Settings GetRenderSettings() const;
 
 private:
     struct BusQuery {
@@ -33,10 +35,12 @@ private:
     std::vector<Stop> stop_queries_;
     std::vector<BusQuery> bus_queries_;
     std::unordered_map<std::string, std::unordered_map<std::string, double>> stop_distances_;
+    renderer::Settings render_settings_;
 
-    void ReadDocument(std::istream& in);
+    void ReadDocument(std::istream& in, bool read_output_queries);
     void ReadInputQueries(const json::Array& in_queries);
     void ReadOutputQueries(const json::Array& out_queries);
+    void ReadRenderSettings(const json::Dict& settings);
 
     void AddStopQuery(const json::Dict& query);
     void AddBusQuery(const json::Dict& query);
