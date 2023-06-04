@@ -122,9 +122,14 @@ void JsonReader::ReadRenderSettings(const json::Dict& settings_dict) {
     render_settings_.line_width = settings_dict.at("line_width"s).AsDouble();
     render_settings_.stop_radius = settings_dict.at("stop_radius"s).AsDouble();
     render_settings_.bus_label_font_size = settings_dict.at("bus_label_font_size"s).AsInt();
+    render_settings_.stop_label_font_size = settings_dict.at("stop_label_font_size"s).AsInt();
+
     std::vector<json::Node> offset = settings_dict.at("bus_label_offset"s).AsArray();
     render_settings_.bus_label_offset = svg::Point(offset[0].AsDouble(), offset[1].AsDouble());
-    render_settings_.stop_label_font_size = settings_dict.at("stop_label_font_size"s).AsInt();
+
+    offset = settings_dict.at("stop_label_offset"s).AsArray();
+    render_settings_.stop_label_offset = svg::Point(offset[0].AsDouble(), offset[1].AsDouble());
+
     render_settings_.underlayer_color = std::visit(ColorSetter(), settings_dict.at("underlayer_color"s).GetValue());
     render_settings_.underlayer_width = settings_dict.at("underlayer_width"s).AsDouble();
 

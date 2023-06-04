@@ -36,7 +36,7 @@ std::vector<svg::Text> MapRenderer::RenderBusNames(
     std::vector<svg::Text> result;
 
     for (size_t i = 0; i < sorted_buses.size(); ++i) {
-        AddTexts(
+        AddBusTexts(
             result,
             sorted_buses[i]->stops[0]->coords,
             GetCurrentColor(i),
@@ -45,19 +45,21 @@ std::vector<svg::Text> MapRenderer::RenderBusNames(
 
         if (!sorted_buses[i]->is_roundtrip) {
             size_t end_stop_idx = sorted_buses[i]->stops.size() / 2;
-            AddTexts(
-                result,
-                sorted_buses[i]->stops[end_stop_idx]->coords,
-                GetCurrentColor(i),
-                sorted_buses[i]->name
-            );
+            if (sorted_buses[i]->stops[0] != sorted_buses[i]->stops[end_stop_idx]) {
+                AddBusTexts(
+                    result,
+                    sorted_buses[i]->stops[end_stop_idx]->coords,
+                    GetCurrentColor(i),
+                    sorted_buses[i]->name
+                );
+            }
         }
     }
 
     return result;
 }
 
-void MapRenderer::AddTexts(
+void MapRenderer::AddBusTexts(
     std::vector<svg::Text>& to,
     geo::Coordinates coords,
     svg::Color color,
@@ -78,6 +80,7 @@ void MapRenderer::AddTexts(
 
     under_text.SetFillColor(settings_.underlayer_color);
     under_text.SetStrokeColor(settings_.underlayer_color);
+    under_text.SetStrokeWidth(settings_.underlayer_width);
     under_text.SetStrokeLineCap(svg::StrokeLineCap::ROUND);
     under_text.SetStrokeLineJoin(svg::StrokeLineJoin::ROUND);
 
@@ -103,6 +106,54 @@ std::vector<svg::Circle> MapRenderer::RenderStopCircles(
     }
 
     return result;
+}
+
+std::vector<svg::Text> MapRenderer::RenderStopNames(
+    const std::vector<const Stop*>& sorted_stops
+) const {
+    using namespace std::literals;
+    std::vector<svg::Text> result;
+
+    for (const auto stop : sorted_stops) {
+        AddStopTexts(
+            result,
+            stop->coords,
+            "black"s,
+            stop->name
+        );
+    }
+
+    return result;
+}
+
+void MapRenderer::AddStopTexts(
+    std::vector<svg::Text>& to,
+    geo::Coordinates coords,
+    svg::Color color,
+    const std::string& data
+) const {
+    using namespace std::literals;
+    svg::Text under_text;
+    svg::Text text;
+
+    for (auto t : {&under_text, &text}) {
+        t->SetPosition(projector_(coords));
+        t->SetOffset(settings_.stop_label_offset);
+        t->SetFontSize(settings_.stop_label_font_size);
+        t->SetFontFamily("Verdana"s);
+        t->SetData(data);
+    }
+
+    under_text.SetFillColor(settings_.underlayer_color);
+    under_text.SetStrokeColor(settings_.underlayer_color);
+    under_text.SetStrokeWidth(settings_.underlayer_width);
+    under_text.SetStrokeLineCap(svg::StrokeLineCap::ROUND);
+    under_text.SetStrokeLineJoin(svg::StrokeLineJoin::ROUND);
+
+    text.SetFillColor(color);
+
+    to.push_back(under_text);
+    to.push_back(text);
 }
 
 svg::Color MapRenderer::GetCurrentColor(size_t idx) const {

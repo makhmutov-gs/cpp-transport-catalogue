@@ -115,7 +115,9 @@ std::string Text::Process(std::string data) {
 
 void Text::RenderObject(const RenderContext& context) const {
     auto& out = context.out;
-    out << "<text x=\""sv << pos_.x << "\" y=\""sv << pos_.y << "\""sv;
+    out << "<text";
+    RenderAttrs(out);
+    out << " x=\""sv << pos_.x << "\" y=\""sv << pos_.y << "\""sv;
     out << " dx=\""sv << offset_.x << "\" dy=\"" << offset_.y << "\""sv;
     out << " font-size=\""sv << font_size_ << "\""sv;
 
@@ -125,7 +127,6 @@ void Text::RenderObject(const RenderContext& context) const {
     if (font_weight_) {
         out << " font-weight=\""sv << font_weight_.value() << "\""sv;
     }
-    RenderAttrs(out);
     out << ">"sv;
     out << data_;
     out << "</text>"sv;

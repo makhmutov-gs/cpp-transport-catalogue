@@ -37,6 +37,10 @@ svg::Document RequestHandler::RenderMap() const {
         result.Add(circles);
     }
 
+    for (const auto& text : renderer_.RenderStopNames(sorted_stops)) {
+        result.Add(text);
+    }
+
     return result;
 }
 

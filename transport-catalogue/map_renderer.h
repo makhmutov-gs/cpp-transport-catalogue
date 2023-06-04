@@ -20,6 +20,7 @@ struct Settings {
     double stop_radius;
     int bus_label_font_size;
     svg::Point bus_label_offset;
+    svg::Point stop_label_offset;
     int stop_label_font_size;
     svg::Color underlayer_color;
     double underlayer_width;
@@ -117,6 +118,10 @@ public:
         const std::vector<const Stop*>& sorted_stops
     ) const;
 
+    std::vector<svg::Text> RenderStopNames(
+        const std::vector<const Stop*>& sorted_stops
+    ) const;
+
     void SetProjectorFromCoords(std::vector<geo::Coordinates> coords) {
         projector_ = SphereProjector(
             coords.begin(),
@@ -132,7 +137,14 @@ private:
     SphereProjector projector_;
 
     svg::Color GetCurrentColor(size_t idx) const;
-    void AddTexts(
+    void AddBusTexts(
+        std::vector<svg::Text>& to,
+        geo::Coordinates coords,
+        svg::Color color,
+        const std::string& data
+    ) const;
+
+    void AddStopTexts(
         std::vector<svg::Text>& to,
         geo::Coordinates coords,
         svg::Color color,
