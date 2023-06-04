@@ -27,6 +27,7 @@ struct BusInfo {
 struct Bus {
     std::string name;
     std::vector<const Stop*> stops;
+    bool is_roundtrip;
 };
 
 struct StopPairHash {
@@ -52,7 +53,8 @@ public:
 
     void AddBus(
         const std::string& name,
-        const std::vector<std::string>& stops
+        const std::vector<std::string>& stops,
+        bool is_roundtrip
     );
 
     const std::deque<Bus>& GetBuses() const {

@@ -4,17 +4,21 @@ namespace catalogue::requests {
 
 RequestHandler::RequestHandler(
     const TransportCatalogue& cat,
-    const renderer::MapRenderer& renderer
+    renderer::MapRenderer& renderer
 ) : cat_(cat)
   , renderer_(renderer) {}
 
 svg::Document RequestHandler::RenderMap() const {
-    auto coords = GetCoordsOnRoutes();
     auto sorted_buses = GetSortedBuses();
+    renderer_.SetProjectorFromCoords(GetCoordsOnRoutes());
 
     svg::Document result;
-    for (const auto& route : renderer_.RenderRoutes(coords, sorted_buses)) {
+    for (const auto& route : renderer_.RenderLines(sorted_buses)) {
         result.Add(route);
+    }
+
+    for (const auto& text : renderer_.RenderBusNames(sorted_buses)) {
+        result.Add(text);
     }
 
     return result;

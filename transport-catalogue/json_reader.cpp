@@ -24,7 +24,7 @@ void JsonReader::ProcessInQueries(TransportCatalogue& cat) {
     }
 
     for (auto& bus : bus_queries_) {
-        cat.AddBus(bus.name, bus.stops);
+        cat.AddBus(bus.name, bus.stops, bus.is_roundtrip);
     }
 }
 
@@ -156,6 +156,7 @@ void JsonReader::AddStopQuery(const json::Dict& query) {
 void JsonReader::AddBusQuery(const json::Dict& query) {
     std::string name = query.at("name").AsString();
     std::vector<std::string> stops;
+    bool is_roundtrip = true;
     for (const auto& stop_name : query.at("stops").AsArray()) {
         stops.push_back(stop_name.AsString());
     }
@@ -163,9 +164,10 @@ void JsonReader::AddBusQuery(const json::Dict& query) {
     if (!query.at("is_roundtrip").AsBool()) {
         std::vector<std::string> tmp{stops.rbegin() + 1, stops.rend()};
         stops.insert(stops.end(), tmp.begin(), tmp.end());
+        is_roundtrip = false;
     }
 
-    bus_queries_.push_back({name, stops});
+    bus_queries_.push_back({name, stops, is_roundtrip});
 }
 
 json::Dict JsonReader::FormStopQuery(const OutQuery& query, const TransportCatalogue& cat) {

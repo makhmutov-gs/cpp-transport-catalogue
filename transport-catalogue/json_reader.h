@@ -17,6 +17,7 @@ private:
     struct BusQuery {
         std::string name;
         std::vector<std::string> stops;
+        bool is_roundtrip = true;
     };
 
     enum class OutQueryType {

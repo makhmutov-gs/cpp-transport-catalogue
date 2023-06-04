@@ -20,10 +20,12 @@ void TransportCatalogue::SetRoadDistance(
 
 void TransportCatalogue::AddBus(
     const std::string& name,
-    const std::vector<std::string>& stops
+    const std::vector<std::string>& stops,
+    bool is_roundtrip
 ) {
     Bus bus;
     bus.name = std::move(name);
+    bus.is_roundtrip = is_roundtrip;
 
     for (const auto& stop_name : stops) {
         bus.stops.push_back(stopname_to_stop_[stop_name]);

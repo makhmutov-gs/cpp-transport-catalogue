@@ -6,7 +6,7 @@ namespace catalogue::requests {
 
 class RequestHandler {
 public:
-    RequestHandler(const TransportCatalogue& cat, const renderer::MapRenderer& renderer);
+    RequestHandler(const TransportCatalogue& cat, renderer::MapRenderer& renderer);
 
     svg::Document RenderMap() const;
 
@@ -15,7 +15,7 @@ private:
     std::vector<const Bus*> GetSortedBuses() const;
     // RequestHandler использует агрегацию объектов "Транспортный Справочник" и "Визуализатор Карты"
     const TransportCatalogue& cat_;
-    const renderer::MapRenderer& renderer_;
+    renderer::MapRenderer& renderer_;
 };
 
 }

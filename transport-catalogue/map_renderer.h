@@ -33,6 +33,9 @@ inline bool IsZero(double value) {
 
 class SphereProjector {
 public:
+
+    SphereProjector() = default;
+
     // points_begin и points_end задают начало и конец интервала элементов geo::Coordinates
     template <typename PointInputIt>
     SphereProjector(PointInputIt points_begin, PointInputIt points_end,
@@ -102,15 +105,35 @@ class MapRenderer {
 public:
     MapRenderer(Settings settings);
 
-    std::vector<svg::Polyline> RenderRoutes(
-        const std::vector<geo::Coordinates>& coords,
+    std::vector<svg::Polyline> RenderLines(
         const std::vector<const Bus*>& sorted_buses
     ) const;
 
+    std::vector<svg::Text> RenderBusNames(
+        const std::vector<const Bus*>& sorted_buses
+    ) const;
+
+    void SetProjectorFromCoords(std::vector<geo::Coordinates> coords) {
+        projector_ = SphereProjector(
+            coords.begin(),
+            coords.end(),
+            settings_.width,
+            settings_.heigth,
+            settings_.padding
+        );
+    }
+
 private:
     Settings settings_;
+    SphereProjector projector_;
 
     svg::Color GetCurrentColor(size_t idx) const;
+    void AddTexts(
+        std::vector<svg::Text>& to,
+        geo::Coordinates coords,
+        svg::Color color,
+        const std::string& data
+    ) const;
 };
 
 }
