@@ -113,6 +113,10 @@ public:
         const std::vector<const Bus*>& sorted_buses
     ) const;
 
+    std::vector<svg::Circle> RenderStopCircles(
+        const std::vector<const Stop*>& sorted_stops
+    ) const;
+
     void SetProjectorFromCoords(std::vector<geo::Coordinates> coords) {
         projector_ = SphereProjector(
             coords.begin(),

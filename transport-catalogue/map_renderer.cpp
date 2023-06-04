@@ -87,6 +87,23 @@ void MapRenderer::AddTexts(
     to.push_back(text);
 }
 
+std::vector<svg::Circle> MapRenderer::RenderStopCircles(
+        const std::vector<const Stop*>& sorted_stops
+) const {
+    using namespace std::literals;
+    std::vector<svg::Circle> result;
+
+    for (const auto stop : sorted_stops) {
+        svg::Circle c;
+        c.SetCenter(projector_(stop->coords));
+        c.SetRadius(settings_.stop_radius);
+        c.SetFillColor("white"s);
+
+        result.push_back(c);
+    }
+
+    return result;
+}
 
 svg::Color MapRenderer::GetCurrentColor(size_t idx) const {
     return settings_.color_palette[idx % settings_.color_palette.size()];

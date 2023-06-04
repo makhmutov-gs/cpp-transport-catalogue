@@ -2,6 +2,17 @@
 
 namespace catalogue::requests {
 
+template <typename T>
+void SortByName(std::vector<T*>& container) {
+    std::sort(
+        container.begin(),
+        container.end(),
+        [] (const T* lhs, const T* rhs) {
+            return lhs->name < rhs->name;
+        }
+    );
+}
+
 RequestHandler::RequestHandler(
     const TransportCatalogue& cat,
     renderer::MapRenderer& renderer
@@ -10,6 +21,7 @@ RequestHandler::RequestHandler(
 
 svg::Document RequestHandler::RenderMap() const {
     auto sorted_buses = GetSortedBuses();
+    auto sorted_stops = GetSortedStopsOnRoutes();
     renderer_.SetProjectorFromCoords(GetCoordsOnRoutes());
 
     svg::Document result;
@@ -19,6 +31,10 @@ svg::Document RequestHandler::RenderMap() const {
 
     for (const auto& text : renderer_.RenderBusNames(sorted_buses)) {
         result.Add(text);
+    }
+
+    for (const auto& circles : renderer_.RenderStopCircles(sorted_stops)) {
+        result.Add(circles);
     }
 
     return result;
@@ -34,6 +50,17 @@ std::vector<geo::Coordinates> RequestHandler::GetCoordsOnRoutes() const {
     return coords;
 }
 
+std::vector<const Stop*> RequestHandler::GetSortedStopsOnRoutes() const {
+    std::set<const Stop*> stops_set;
+    for (const auto& bus : cat_.GetBuses()) {
+        stops_set.insert(bus.stops.begin(), bus.stops.end());
+    }
+    std::vector<const Stop*> stops(stops_set.begin(), stops_set.end());
+    SortByName(stops);
+
+    return stops;
+}
+
 std::vector<const Bus*> RequestHandler::GetSortedBuses() const {
     std::vector<const Bus*> buses;
 
@@ -41,13 +68,7 @@ std::vector<const Bus*> RequestHandler::GetSortedBuses() const {
         buses.push_back(&bus);
     }
 
-    std::sort(
-        buses.begin(),
-        buses.end(),
-        [] (const Bus* lhs, const Bus* rhs) {
-            return lhs->name < rhs->name;
-        }
-    );
+    SortByName(buses);
 
     return buses;
 }
