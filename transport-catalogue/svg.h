@@ -12,13 +12,7 @@
 namespace svg {
 
 struct Rgb {
-    Rgb(uint8_t r, uint8_t g, uint8_t b)
-        : red(r)
-        , green(g)
-        , blue(b)
-    {
-    }
-
+    Rgb(uint8_t r, uint8_t g, uint8_t b);
     Rgb() = default;
 
     uint8_t red = 0;
@@ -27,14 +21,7 @@ struct Rgb {
 };
 
 struct Rgba {
-    Rgba(uint8_t r, uint8_t g, uint8_t b, double op)
-        : red(r)
-        , green(g)
-        , blue(b)
-        , opacity(op)
-    {
-    }
-
+    Rgba(uint8_t r, uint8_t g, uint8_t b, double op);
     Rgba() = default;
 
     uint8_t red = 0;
@@ -50,38 +37,14 @@ inline const Color NoneColor{"none"};
 struct ColorPrinter {
     std::ostream& out;
 
-    void operator()(std::monostate) {
-        using namespace std::literals;
-        out << "none"sv;
-    }
-
-    void operator()(std::string color) {
-        out << color;
-    }
-
-    void operator()(svg::Rgb rgb) {
-        using namespace std::literals;
-        out << "rgb("sv
-            << static_cast<unsigned int>(rgb.red) << ","sv
-            << static_cast<unsigned int>(rgb.green) << ","sv
-            << static_cast<unsigned int>(rgb.blue) << ")"sv;
-    }
-
-    void operator()(svg::Rgba rgba) {
-        using namespace std::literals;
-        out << "rgba("sv
-            << static_cast<unsigned int>(rgba.red) << ","sv
-            << static_cast<unsigned int>(rgba.green) << ","sv
-            << static_cast<unsigned int>(rgba.blue) << ","sv
-            << rgba.opacity << ")"sv;
-    }
+    void operator()(std::monostate);
+    void operator()(std::string color);
+    void operator()(svg::Rgb rgb);
+    void operator()(svg::Rgba rgba);
 
 };
 
-inline std::ostream& operator<<(std::ostream& out, Color color) {
-    std::visit(ColorPrinter{out}, color);
-    return out;
-}
+std::ostream& operator<<(std::ostream& out, Color color);
 
 enum class StrokeLineCap {
     BUTT,
@@ -111,15 +74,8 @@ inline const std::unordered_map<StrokeLineJoin, std::string> line_join_literals 
     {StrokeLineJoin::ROUND, "round"}
 };
 
-inline std::ostream& operator<<(std::ostream& out, StrokeLineCap stroke_line_cap) {
-    out << line_cap_literals.at(stroke_line_cap);
-    return out;
-}
-
-inline std::ostream& operator<<(std::ostream& out, StrokeLineJoin stroke_line_join) {
-    out << line_join_literals.at(stroke_line_join);
-    return out;
-}
+std::ostream& operator<<(std::ostream& out, StrokeLineCap stroke_line_cap);
+std::ostream& operator<<(std::ostream& out, StrokeLineJoin stroke_line_join);
 
 template <typename Owner>
 class PathProps {
@@ -191,10 +147,7 @@ private:
 
 struct Point {
     Point() = default;
-    Point(double x, double y)
-        : x(x)
-        , y(y) {
-    }
+    Point(double x, double y) : x(x), y(y) {}
     double x = 0;
     double y = 0;
 };
@@ -204,25 +157,13 @@ struct Point {
  * Хранит ссылку на поток вывода, текущее значение и шаг отступа при выводе элемента
  */
 struct RenderContext {
-    RenderContext(std::ostream& out)
-        : out(out) {
-    }
+    RenderContext(std::ostream& out);
 
-    RenderContext(std::ostream& out, int indent_step, int indent = 0)
-        : out(out)
-        , indent_step(indent_step)
-        , indent(indent) {
-    }
+    RenderContext(std::ostream& out, int indent_step, int indent = 0);
 
-    RenderContext Indented() const {
-        return {out, indent_step, indent + indent_step};
-    }
+    RenderContext Indented() const;
 
-    void RenderIndent() const {
-        for (int i = 0; i < indent; ++i) {
-            out.put(' ');
-        }
-    }
+    void RenderIndent() const;
 
     std::ostream& out;
     int indent_step = 0;

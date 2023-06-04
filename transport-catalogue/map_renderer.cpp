@@ -2,6 +2,13 @@
 
 namespace catalogue::renderer {
 
+svg::Point SphereProjector::operator()(geo::Coordinates coords) const {
+    return {
+        (coords.lng - min_lon_) * zoom_coeff_ + padding_,
+        (max_lat_ - coords.lat) * zoom_coeff_ + padding_
+    };
+}
+
 MapRenderer::MapRenderer(Settings settings)
     : settings_(std::move(settings))
 {
@@ -124,6 +131,16 @@ std::vector<svg::Text> MapRenderer::RenderStopNames(
     }
 
     return result;
+}
+
+void MapRenderer::SetProjectorFromCoords(std::vector<geo::Coordinates> coords) {
+    projector_ = SphereProjector(
+        coords.begin(),
+        coords.end(),
+        settings_.width,
+        settings_.heigth,
+        settings_.padding
+    );
 }
 
 void MapRenderer::AddStopTexts(

@@ -8,26 +8,17 @@
 #include <utility>
 #include <set>
 #include <optional>
-#include "geo.h"
+#include "domain.h"
 
 namespace catalogue {
 
-struct Stop {
-    std::string name;
-    geo::Coordinates coords;
-};
+using namespace domain;
 
 struct BusInfo {
     size_t stop_count;
     size_t unique_stops;
     double road_length;
     double curvature;
-};
-
-struct Bus {
-    std::string name;
-    std::vector<const Stop*> stops;
-    bool is_roundtrip;
 };
 
 struct StopPairHash {

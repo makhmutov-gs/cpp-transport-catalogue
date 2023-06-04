@@ -20,6 +20,4 @@ int main() {
     RequestHandler handler(cat, renderer);
 
     reader.PrintOutQueries(cat, handler, std::cout);
-
-    //handler.RenderMap().Render(std::cout);
 }

@@ -4,6 +4,62 @@ namespace svg {
 
 using namespace std::literals;
 
+Rgb::Rgb(uint8_t r, uint8_t g, uint8_t b)
+    : red(r)
+    , green(g)
+    , blue(b)
+{
+}
+
+Rgba::Rgba(uint8_t r, uint8_t g, uint8_t b, double op)
+    : red(r)
+    , green(g)
+    , blue(b)
+    , opacity(op)
+{
+}
+
+void ColorPrinter::operator()(std::monostate) {
+    using namespace std::literals;
+    out << "none"sv;
+}
+
+void ColorPrinter::operator()(std::string color) {
+    out << color;
+}
+
+void ColorPrinter::operator()(svg::Rgb rgb) {
+    using namespace std::literals;
+    out << "rgb("sv
+        << static_cast<unsigned int>(rgb.red) << ","sv
+        << static_cast<unsigned int>(rgb.green) << ","sv
+        << static_cast<unsigned int>(rgb.blue) << ")"sv;
+}
+
+std::ostream& operator<<(std::ostream& out, Color color) {
+    std::visit(ColorPrinter{out}, color);
+    return out;
+}
+
+void ColorPrinter::operator()(svg::Rgba rgba) {
+    using namespace std::literals;
+    out << "rgba("sv
+        << static_cast<unsigned int>(rgba.red) << ","sv
+        << static_cast<unsigned int>(rgba.green) << ","sv
+        << static_cast<unsigned int>(rgba.blue) << ","sv
+        << rgba.opacity << ")"sv;
+}
+
+std::ostream& operator<<(std::ostream& out, StrokeLineCap stroke_line_cap) {
+    out << line_cap_literals.at(stroke_line_cap);
+    return out;
+}
+
+std::ostream& operator<<(std::ostream& out, StrokeLineJoin stroke_line_join) {
+    out << line_join_literals.at(stroke_line_join);
+    return out;
+}
+
 void Object::Render(const RenderContext& context) const {
     context.RenderIndent();
 
@@ -11,6 +67,26 @@ void Object::Render(const RenderContext& context) const {
     RenderObject(context);
 
     context.out << std::endl;
+}
+
+RenderContext::RenderContext(std::ostream& out)
+    : out(out) {
+}
+
+RenderContext::RenderContext(std::ostream& out, int indent_step, int indent)
+    : out(out)
+    , indent_step(indent_step)
+    , indent(indent) {
+}
+
+RenderContext RenderContext::Indented() const {
+    return {out, indent_step, indent + indent_step};
+}
+
+void RenderContext::RenderIndent() const {
+    for (int i = 0; i < indent; ++i) {
+        out.put(' ');
+    }
 }
 
 // ---------- Circle ------------------

@@ -2,6 +2,7 @@ project('transport_catalogue', 'cpp', default_options: ['cpp_std=c++20', 'warnin
 
 src = [
     'transport-catalogue/geo.h',
+    'transport-catalogue/geo.cpp',
     'transport-catalogue/main.cpp',
     'transport-catalogue/transport_catalogue.cpp',
     'transport-catalogue/transport_catalogue.h',
@@ -10,7 +11,6 @@ src = [
     'transport-catalogue/json.h',
     'transport-catalogue/json.cpp',
     'transport-catalogue/domain.h',
-    'transport-catalogue/domain.cpp',
     'transport-catalogue/map_renderer.h',
     'transport-catalogue/map_renderer.cpp',
     'transport-catalogue/request_handler.h',
