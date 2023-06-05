@@ -141,12 +141,12 @@ void JsonReader::ReadRenderSettings(const json::Dict& settings_dict) {
     offset = settings_dict.at("stop_label_offset"s).AsArray();
     render_settings_.stop_label_offset = svg::Point(offset[0].AsDouble(), offset[1].AsDouble());
 
-    render_settings_.underlayer_color = std::visit(ColorSetter(), settings_dict.at("underlayer_color"s).GetValue());
+    render_settings_.underlayer_color = std::visit(ColorSetter(), settings_dict.at("underlayer_color"s).Get());
     render_settings_.underlayer_width = settings_dict.at("underlayer_width"s).AsDouble();
 
     for (const auto& color : settings_dict.at("color_palette").AsArray()) {
         render_settings_.color_palette.push_back(
-            std::visit(ColorSetter(), color.GetValue())
+            std::visit(ColorSetter(), color.Get())
         );
     }
 }

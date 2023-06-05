@@ -24,21 +24,11 @@ public:
     using logic_error::logic_error;
 };
 
-class Node {
+using JsonVariant = std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string>;
+
+class Node final : private JsonVariant {
 public:
-    using Value = std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string>;
-
-    Node(Array value);
-    Node(Dict value);
-    Node(bool value);
-    Node(int value);
-    Node(double value);
-    Node(std::string value);
-    Node(std::nullptr_t);
-
-    Node() = default;
-
-    const Value& GetValue() const { return value_; }
+    using variant::variant;
 
     bool IsInt() const;
     bool IsDouble() const;
@@ -56,12 +46,11 @@ public:
     const Array& AsArray() const;
     const Dict& AsMap() const;
 
-private:
-    Value value_;
-};
+    const JsonVariant& Get() const;
 
-bool operator==(const Node& lhs, const Node& rhs);
-bool operator!=(const Node& lhs, const Node& rhs);
+    bool operator==(const Node& rhs) const;
+    bool operator!=(const Node& rhs) const;
+};
 
 class Document {
 public:
