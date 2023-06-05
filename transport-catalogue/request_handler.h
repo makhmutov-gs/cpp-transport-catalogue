@@ -11,9 +11,8 @@ public:
     svg::Document RenderMap() const;
 
 private:
-    std::vector<geo::Coordinates> GetCoordsOnRoutes() const;
     std::vector<const Bus*> GetSortedBuses() const;
-    std::vector<const Stop*> GetSortedStopsOnRoutes() const;
+    std::vector<const Stop*> GetSortedStops() const;
 
     const TransportCatalogue& cat_;
     renderer::MapRenderer& renderer_;

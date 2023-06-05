@@ -14,6 +14,33 @@ MapRenderer::MapRenderer(Settings settings)
 {
 }
 
+svg::Document MapRenderer::Render(
+    const std::vector<const Bus*>& sorted_buses,
+    const std::vector<const Stop*>& sorted_stops
+) {
+    InitProjector(sorted_stops);
+
+    svg::Document result;
+
+    for (const auto& route : RenderLines(sorted_buses)) {
+        result.Add(route);
+    }
+
+    for (const auto& text : RenderBusNames(sorted_buses)) {
+        result.Add(text);
+    }
+
+    for (const auto& circles : RenderStopCircles(sorted_stops)) {
+        result.Add(circles);
+    }
+
+    for (const auto& text : RenderStopNames(sorted_stops)) {
+        result.Add(text);
+    }
+
+    return result;
+}
+
 std::vector<svg::Polyline> MapRenderer::RenderLines(
     const std::vector<const Bus*>& sorted_buses
 ) const {
@@ -133,7 +160,16 @@ std::vector<svg::Text> MapRenderer::RenderStopNames(
     return result;
 }
 
-void MapRenderer::SetProjectorFromCoords(std::vector<geo::Coordinates> coords) {
+void MapRenderer::InitProjector(const std::vector<const Stop*>& stops) {
+    std::vector<geo::Coordinates> coords;
+    coords.reserve(stops.size());
+
+    std::transform(stops.begin(), stops.end(), std::back_inserter(coords),
+        [](const Stop* s){
+            return s->coords;
+        }
+    );
+
     projector_ = SphereProjector(
         coords.begin(),
         coords.end(),

@@ -58,6 +58,31 @@ class MapRenderer {
 public:
     MapRenderer(Settings settings);
 
+    svg::Document Render(
+        const std::vector<const Bus*>& sorted_buses,
+        const std::vector<const Stop*>& sorted_stops
+    );
+
+private:
+    Settings settings_;
+    SphereProjector projector_;
+
+    svg::Color GetCurrentColor(size_t idx) const;
+
+    void VisualiseBusTexts(
+        std::vector<svg::Text>& to,
+        geo::Coordinates coords,
+        svg::Color color,
+        const std::string& data
+    ) const;
+
+    void VisualiseStopTexts(
+        std::vector<svg::Text>& to,
+        geo::Coordinates coords,
+        svg::Color color,
+        const std::string& data
+    ) const;
+
     std::vector<svg::Polyline> RenderLines(
         const std::vector<const Bus*>& sorted_buses
     ) const;
@@ -74,26 +99,7 @@ public:
         const std::vector<const Stop*>& sorted_stops
     ) const;
 
-    void SetProjectorFromCoords(std::vector<geo::Coordinates> coords);
-
-private:
-    Settings settings_;
-    SphereProjector projector_;
-
-    svg::Color GetCurrentColor(size_t idx) const;
-    void VisualiseBusTexts(
-        std::vector<svg::Text>& to,
-        geo::Coordinates coords,
-        svg::Color color,
-        const std::string& data
-    ) const;
-
-    void VisualiseStopTexts(
-        std::vector<svg::Text>& to,
-        geo::Coordinates coords,
-        svg::Color color,
-        const std::string& data
-    ) const;
+    void InitProjector(const std::vector<const Stop*>& stops);
 };
 
 
