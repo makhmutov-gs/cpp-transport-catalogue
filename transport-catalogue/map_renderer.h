@@ -81,14 +81,14 @@ private:
     SphereProjector projector_;
 
     svg::Color GetCurrentColor(size_t idx) const;
-    void AddBusTexts(
+    void VisualiseBusTexts(
         std::vector<svg::Text>& to,
         geo::Coordinates coords,
         svg::Color color,
         const std::string& data
     ) const;
 
-    void AddStopTexts(
+    void VisualiseStopTexts(
         std::vector<svg::Text>& to,
         geo::Coordinates coords,
         svg::Color color,

@@ -43,7 +43,7 @@ std::vector<svg::Text> MapRenderer::RenderBusNames(
     std::vector<svg::Text> result;
 
     for (size_t i = 0; i < sorted_buses.size(); ++i) {
-        AddBusTexts(
+        VisualiseBusTexts(
             result,
             sorted_buses[i]->stops[0]->coords,
             GetCurrentColor(i),
@@ -53,7 +53,7 @@ std::vector<svg::Text> MapRenderer::RenderBusNames(
         if (!sorted_buses[i]->is_roundtrip) {
             size_t end_stop_idx = sorted_buses[i]->stops.size() / 2;
             if (sorted_buses[i]->stops[0] != sorted_buses[i]->stops[end_stop_idx]) {
-                AddBusTexts(
+                VisualiseBusTexts(
                     result,
                     sorted_buses[i]->stops[end_stop_idx]->coords,
                     GetCurrentColor(i),
@@ -66,7 +66,7 @@ std::vector<svg::Text> MapRenderer::RenderBusNames(
     return result;
 }
 
-void MapRenderer::AddBusTexts(
+void MapRenderer::VisualiseBusTexts(
     std::vector<svg::Text>& to,
     geo::Coordinates coords,
     svg::Color color,
@@ -122,7 +122,7 @@ std::vector<svg::Text> MapRenderer::RenderStopNames(
     std::vector<svg::Text> result;
 
     for (const auto stop : sorted_stops) {
-        AddStopTexts(
+        VisualiseStopTexts(
             result,
             stop->coords,
             "black"s,
@@ -143,7 +143,7 @@ void MapRenderer::SetProjectorFromCoords(std::vector<geo::Coordinates> coords) {
     );
 }
 
-void MapRenderer::AddStopTexts(
+void MapRenderer::VisualiseStopTexts(
     std::vector<svg::Text>& to,
     geo::Coordinates coords,
     svg::Color color,
