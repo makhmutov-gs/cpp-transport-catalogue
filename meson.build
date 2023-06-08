@@ -6,6 +6,8 @@ src = [
     'transport-catalogue/main.cpp',
     'transport-catalogue/transport_catalogue.cpp',
     'transport-catalogue/transport_catalogue.h',
+    'transport-catalogue/json_builder.h',
+    'transport-catalogue/json_builder.cpp',
     'transport-catalogue/json_reader.h',
     'transport-catalogue/json_reader.cpp',
     'transport-catalogue/json.h',
