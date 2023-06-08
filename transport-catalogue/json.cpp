@@ -77,7 +77,7 @@ const Array& Node::AsArray() const {
     return std::get<Array>(*this);
 }
 
-const Dict& Node::AsMap() const {
+const Dict& Node::AsDict() const {
     if (!IsDict()) {
         throw InvalidTypeError("Value is not a map.");
     }

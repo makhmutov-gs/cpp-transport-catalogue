@@ -1,4 +1,5 @@
 #include "json_reader.h"
+#include "json_builder.h"
 #include <sstream>
 
 namespace catalogue::reader {
@@ -54,7 +55,7 @@ void JsonReader::ReadDocument(std::istream& in, bool read_output_queries) {
         throw json::InvalidTypeError("Invalid json input.");
     }
 
-    const auto root_map = doc.GetRoot().AsMap();
+    const auto root_map = doc.GetRoot().AsDict();
     if (root_map.count(BASE_REQUESTS) == 0 || root_map.count(STAT_REQUESTS) == 0) {
         throw json::InvalidTypeError("Invalid json input.");
     }
@@ -63,32 +64,32 @@ void JsonReader::ReadDocument(std::istream& in, bool read_output_queries) {
     if (read_output_queries) {
         ReadOutputQueries(root_map.at(STAT_REQUESTS).AsArray());
     }
-    ReadRenderSettings(root_map.at(RENDER_SETTINGS).AsMap());
+    ReadRenderSettings(root_map.at(RENDER_SETTINGS).AsDict());
 }
 
 void JsonReader::ReadInputQueries(const json::Array& in_queries) {
     for (const auto& query : in_queries) {
-        std::string type = query.AsMap().at("type"s).AsString();
+        std::string type = query.AsDict().at("type"s).AsString();
         if (type == "Stop"s) {
-            AddStopQuery(query.AsMap());
+            AddStopQuery(query.AsDict());
         } else if (type == "Bus"s) {
-            AddBusQuery(query.AsMap());
+            AddBusQuery(query.AsDict());
         }
     }
 }
 
 void JsonReader::ReadOutputQueries(const json::Array& out_queries) {
     for (const auto& query : out_queries) {
-        int id = query.AsMap().at("id").AsInt();
-        std::string type = query.AsMap().at("type"s).AsString();
+        int id = query.AsDict().at("id").AsInt();
+        std::string type = query.AsDict().at("type"s).AsString();
 
         if (type == "Stop"s) {
             out_queries_.push_back(
-                {id, OutQueryType::STOP, query.AsMap().at("name"s).AsString()}
+                {id, OutQueryType::STOP, query.AsDict().at("name"s).AsString()}
             );
         } else if (type == "Bus"s) {
             out_queries_.push_back(
-                {id, OutQueryType::BUS, query.AsMap().at("name"s).AsString()}
+                {id, OutQueryType::BUS, query.AsDict().at("name"s).AsString()}
             );
         } else if (type == "Map"s) {
             out_queries_.push_back(
@@ -163,7 +164,7 @@ void JsonReader::AddStopQuery(const json::Dict& query) {
 
     stop_queries_.push_back({name, {lat, lon}});
 
-    for (const auto& [stop_name, distance] : query.at("road_distances"s).AsMap()) {
+    for (const auto& [stop_name, distance] : query.at("road_distances"s).AsDict()) {
         stop_distances_[name].insert({stop_name, distance.AsDouble()});
     }
 

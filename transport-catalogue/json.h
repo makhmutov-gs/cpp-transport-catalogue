@@ -47,7 +47,7 @@ public:
     double AsDouble() const;
     const std::string& AsString() const;
     const Array& AsArray() const;
-    const Dict& AsMap() const;
+    const Dict& AsDict() const;
 
     const Value& GetValue() const;
     Value& GetValue();
