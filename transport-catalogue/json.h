@@ -24,11 +24,14 @@ public:
     using logic_error::logic_error;
 };
 
-using JsonVariant = std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string>;
 
-class Node final : private JsonVariant {
+class Node final
+    : private std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string> {
 public:
     using variant::variant;
+    using Value = variant;
+
+    Node(Value value);
 
     bool IsInt() const;
     bool IsDouble() const;
@@ -37,7 +40,7 @@ public:
     bool IsString() const;
     bool IsNull() const;
     bool IsArray() const;
-    bool IsMap() const;
+    bool IsDict() const;
 
     int AsInt() const;
     bool AsBool() const;
@@ -46,7 +49,8 @@ public:
     const Array& AsArray() const;
     const Dict& AsMap() const;
 
-    const JsonVariant& Get() const;
+    const Value& GetValue() const;
+    Value& GetValue();
 
     bool operator==(const Node& rhs) const;
     bool operator!=(const Node& rhs) const;

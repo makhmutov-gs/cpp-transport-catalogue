@@ -5,6 +5,8 @@ using namespace std::literals;
 
 namespace json {
 
+Node::Node(Value value) : variant(std::move(value)) {}
+
 bool Node::IsInt() const {
     return std::holds_alternative<int>(*this);
 }
@@ -33,7 +35,7 @@ bool Node::IsArray() const {
     return std::holds_alternative<Array>(*this);
 }
 
-bool Node::IsMap() const {
+bool Node::IsDict() const {
     return std::holds_alternative<Dict>(*this);
 }
 
@@ -76,18 +78,22 @@ const Array& Node::AsArray() const {
 }
 
 const Dict& Node::AsMap() const {
-    if (!IsMap()) {
+    if (!IsDict()) {
         throw InvalidTypeError("Value is not a map.");
     }
     return std::get<Dict>(*this);
 }
 
-const JsonVariant& Node::Get() const {
+const Node::Value& Node::GetValue() const {
+    return *this;
+}
+
+Node::Value& Node::GetValue() {
     return *this;
 }
 
 bool Node::operator==(const Node& rhs) const {
-    return static_cast<JsonVariant>(*this) == static_cast<JsonVariant>(rhs);
+    return GetValue() == rhs.GetValue();
 }
 
 bool Node::operator!=(const Node& rhs) const {
@@ -464,7 +470,7 @@ struct ValuePrinter {
 };
 
 void PrintNode(const Node& node, std::ostream& out) {
-    std::visit(ValuePrinter(out), node.Get());
+    std::visit(ValuePrinter(out), node.GetValue());
 }
 
 void Print(const Document& doc, std::ostream& output) {
