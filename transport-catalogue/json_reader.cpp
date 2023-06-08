@@ -187,7 +187,7 @@ void JsonReader::AddBusQuery(const json::Dict& query) {
     bus_queries_.push_back({name, stops, is_roundtrip});
 }
 
-json::Dict JsonReader::FormStopQuery(const OutQuery& query, const TransportCatalogue& cat) const {
+json::Node JsonReader::FormStopQuery(const OutQuery& query, const TransportCatalogue& cat) const {
     auto bus_list = cat.GetBusesByStop(query.name);
     if (bus_list) {
         std::set<std::string> buses_string;
@@ -195,39 +195,48 @@ json::Dict JsonReader::FormStopQuery(const OutQuery& query, const TransportCatal
             buses_string.insert(std::string(bus_sv));
         }
 
-        json::Array buses{buses_string.begin(), buses_string.end()};
-        return json::Dict{
-            {"buses"s, buses},
-            {"request_id"s, query.id}
-        };
+        return json::Builder{}
+            .StartDict()
+                .Key("buses"s)
+                    .Value(json::Array{buses_string.begin(), buses_string.end()})
+                .Key("request_id"s).Value(query.id)
+            .EndDict()
+            .Build();
+
     } else {
-        return json::Dict{
-            {"error_message"s, "not found"s},
-            {"request_id"s, query.id}
-        };
+        return json::Builder{}
+            .StartDict()
+                .Key("error_message"s).Value("not found"s)
+                .Key("request_id"s).Value(query.id)
+            .EndDict()
+            .Build();
     }
 }
 
-json::Dict JsonReader::FormBusQuery(const OutQuery& query, TransportCatalogue& cat) const {
+json::Node JsonReader::FormBusQuery(const OutQuery& query, TransportCatalogue& cat) const {
     auto bus_info = cat.GetBusInfo(query.name);
 
     if (bus_info) {
-        return json::Dict{
-            {"curvature"s, bus_info->curvature},
-            {"route_length"s, bus_info->road_length},
-            {"stop_count"s, static_cast<int>(bus_info->stop_count)},
-            {"unique_stop_count"s, static_cast<int>(bus_info->unique_stops)},
-            {"request_id"s, query.id}
-        };
+        return json::Builder{}
+            .StartDict()
+                .Key("curvature"s).Value(bus_info->curvature)
+                .Key("route_length"s).Value(bus_info->road_length)
+                .Key("stop_count"s).Value(static_cast<int>(bus_info->stop_count))
+                .Key("unique_stop_count"s).Value(static_cast<int>(bus_info->unique_stops))
+                .Key("request_id"s).Value(query.id)
+            .EndDict()
+            .Build();
     } else {
-        return json::Dict{
-            {"error_message"s, "not found"s},
-            {"request_id"s, query.id}
-        };
+        return json::Builder{}
+            .StartDict()
+                .Key("error_message"s).Value("not found"s)
+                .Key("request_id"s).Value(query.id)
+            .EndDict()
+            .Build();
     }
 }
 
-json::Dict JsonReader::FormMapQuery(
+json::Node JsonReader::FormMapQuery(
     const OutQuery& query,
     const requests::RequestHandler& handler
 ) const {
@@ -236,10 +245,12 @@ json::Dict JsonReader::FormMapQuery(
 
     doc.Render(ostr);
 
-    return json::Dict{
-        {"map"s, ostr.str()},
-        {"request_id"s, query.id}
-    };
+    return json::Builder{}
+        .StartDict()
+            .Key("map"s).Value(ostr.str())
+            .Key("request_id"s).Value(query.id)
+        .EndDict()
+        .Build();
 }
 
 

@@ -52,9 +52,9 @@ private:
     void AddStopQuery(const json::Dict& query);
     void AddBusQuery(const json::Dict& query);
 
-    json::Dict FormStopQuery(const OutQuery& query, const TransportCatalogue& cat) const;
-    json::Dict FormBusQuery(const OutQuery& query, TransportCatalogue& cat) const;
-    json::Dict FormMapQuery(const OutQuery& query, const requests::RequestHandler& handler) const;
+    json::Node FormStopQuery(const OutQuery& query, const TransportCatalogue& cat) const;
+    json::Node FormBusQuery(const OutQuery& query, TransportCatalogue& cat) const;
+    json::Node FormMapQuery(const OutQuery& query, const requests::RequestHandler& handler) const;
 };
 
 }
