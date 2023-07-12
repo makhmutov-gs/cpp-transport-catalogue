@@ -4,12 +4,24 @@ namespace catalogue::requests {
 
 RequestHandler::RequestHandler(
     const TransportCatalogue& cat,
-    renderer::MapRenderer& renderer
+    renderer::MapRenderer& renderer,
+    domain::RoutingSettings routing_settings
 ) : cat_(cat)
-  , renderer_(renderer) {}
+  , sorted_stops_(GetSortedStops())
+  , sorted_buses_(GetSortedBuses())
+  , renderer_(renderer)
+  , router_(sorted_stops_, sorted_buses_, cat_, routing_settings)
+{
+}
 
 svg::Document RequestHandler::RenderMap() const {
-    return renderer_.Render(GetSortedBuses(), GetSortedStops());
+    return renderer_.Render(sorted_buses_, sorted_stops_);
+}
+
+std::optional<catalogue::router::RouteInfo> RequestHandler::FormRoute(
+    const std::string& from, const std::string& to
+) const {
+    return router_.BuildRoute(from, to);
 }
 
 template <typename T>

@@ -3,9 +3,12 @@ project('transport_catalogue', 'cpp', default_options: ['cpp_std=c++20', 'warnin
 src = [
     'transport-catalogue/geo.h',
     'transport-catalogue/geo.cpp',
+    'transport-catalogue/graph.h',
     'transport-catalogue/main.cpp',
     'transport-catalogue/transport_catalogue.cpp',
     'transport-catalogue/transport_catalogue.h',
+    'transport-catalogue/transport_router.cpp',
+    'transport-catalogue/transport_router.h',
     'transport-catalogue/json_builder.h',
     'transport-catalogue/json_builder.cpp',
     'transport-catalogue/json_reader.h',
@@ -15,8 +18,10 @@ src = [
     'transport-catalogue/domain.h',
     'transport-catalogue/map_renderer.h',
     'transport-catalogue/map_renderer.cpp',
+    'transport-catalogue/ranges.h',
     'transport-catalogue/request_handler.h',
     'transport-catalogue/request_handler.cpp',
+    'transport-catalogue/router.h',
     'transport-catalogue/svg.h',
     'transport-catalogue/svg.cpp',
 

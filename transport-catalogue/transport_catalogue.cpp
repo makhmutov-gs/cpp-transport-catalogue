@@ -18,6 +18,18 @@ void TransportCatalogue::SetRoadDistance(
     ] = distance;
 }
 
+std::optional<double> TransportCatalogue::GetRoadDistance(const std::string& from, const std::string& to) const {
+    if (stopname_to_stop_.count(from) == 0 || stopname_to_stop_.count(to) == 0) {
+        return std::nullopt;
+    }
+    auto p = std::pair{stopname_to_stop_.at(from), stopname_to_stop_.at(to)};
+    if (road_distances_.count(p) == 1) {
+        return road_distances_.at(p);
+    } else {
+        return road_distances_.at({p.second, p.first});
+    }
+}
+
 void TransportCatalogue::AddBus(
     const std::string& name,
     const std::vector<std::string>& stops,

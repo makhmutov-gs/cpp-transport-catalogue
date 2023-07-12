@@ -16,4 +16,10 @@ struct Bus {
     bool is_roundtrip;
 };
 
+struct RoutingSettings {
+    int bus_wait_time;
+    double bus_velocity;
+};
+
+
 }

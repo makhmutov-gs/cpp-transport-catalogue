@@ -12,7 +12,8 @@
 
 namespace catalogue {
 
-using namespace domain;
+using domain::Stop;
+using domain::Bus;
 
 struct BusInfo {
     size_t stop_count;
@@ -41,6 +42,8 @@ public:
         const std::string& to,
         double distance
     );
+
+    std::optional<double> GetRoadDistance(const std::string& from, const std::string& to) const;
 
     void AddBus(
         const std::string& name,

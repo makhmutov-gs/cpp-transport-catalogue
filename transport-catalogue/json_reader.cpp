@@ -9,6 +9,7 @@ using namespace std::literals;
 inline const std::string BASE_REQUESTS = "base_requests";
 inline const std::string STAT_REQUESTS = "stat_requests";
 inline const std::string RENDER_SETTINGS = "render_settings";
+inline const std::string ROUTING_SETTINGS = "routing_settings";
 
 JsonReader::JsonReader(std::istream& in, bool read_output_queries) {
     ReadDocument(in, read_output_queries);
@@ -45,6 +46,9 @@ void JsonReader::PrintOutQueries(TransportCatalogue& cat, const requests::Reques
                 break;
         }
     }
+    for (const auto& query : route_queries_) {
+        to_print.push_back(FormRouteQuery(query, handler));
+    }
     json::Print(json::Document(to_print), out);
 }
 
@@ -65,6 +69,7 @@ void JsonReader::ReadDocument(std::istream& in, bool read_output_queries) {
         ReadOutputQueries(root_map.at(STAT_REQUESTS).AsArray());
     }
     ReadRenderSettings(root_map.at(RENDER_SETTINGS).AsDict());
+    ReadRoutingSettings(root_map.at(ROUTING_SETTINGS).AsDict());
 }
 
 void JsonReader::ReadInputQueries(const json::Array& in_queries) {
@@ -94,6 +99,10 @@ void JsonReader::ReadOutputQueries(const json::Array& out_queries) {
         } else if (type == "Map"s) {
             out_queries_.push_back(
                 {id, OutQueryType::MAP, {}}
+            );
+        } else if (type == "Route"s) {
+            route_queries_.push_back(
+                {id, query.AsDict().at("from"s).AsString(), query.AsDict().at("to"s).AsString()}
             );
         }
     }
@@ -152,8 +161,17 @@ void JsonReader::ReadRenderSettings(const json::Dict& settings_dict) {
     }
 }
 
+void JsonReader::ReadRoutingSettings(const json::Dict& settings) {
+    routing_settings_.bus_wait_time = settings.at("bus_wait_time"s).AsInt();
+    routing_settings_.bus_velocity = settings.at("bus_velocity").AsDouble();
+}
+
 renderer::Settings JsonReader::GetRenderSettings() const {
     return render_settings_;
+}
+
+domain::RoutingSettings JsonReader::GetRoutingSettings() const {
+    return routing_settings_;
 }
 
 void JsonReader::AddStopQuery(const json::Dict& query) {
@@ -253,6 +271,55 @@ json::Node JsonReader::FormMapQuery(
         .Build();
 }
 
+ json::Node JsonReader::FormRouteQuery(
+    const RouteQuery& query,
+    const requests::RequestHandler& handler
+) const {
+    auto route = handler.FormRoute(query.from, query.to);
 
+    if (!route.has_value()) {
+        return json::Builder{}
+            .StartDict()
+                .Key("error_message"s).Value("not found"s)
+                .Key("request_id"s).Value(query.id)
+            .EndDict()
+            .Build();
+    }
+
+    json::Array items;
+
+    for (const auto& i : route->edges) {
+        if (i.span_count == 0) {
+            items.push_back(
+                json::Builder{}
+                    .StartDict()
+                        .Key("type"s).Value("Wait"s)
+                        .Key("stop_name"s).Value(std::string(i.name))
+                        .Key("time"s).Value(i.time)
+                    .EndDict()
+                    .Build()
+            );
+        } else {
+            items.push_back(
+                json::Builder{}
+                    .StartDict()
+                        .Key("type"s).Value("Bus"s)
+                        .Key("bus"s).Value(std::string(i.name))
+                        .Key("span_count"s).Value(static_cast<int>(i.span_count))
+                        .Key("time"s).Value(i.time)
+                    .EndDict()
+                    .Build()
+            );
+        }
+    }
+
+    return json::Builder{}
+        .StartDict()
+            .Key("request_id"s).Value(query.id)
+            .Key("total_time"s).Value(route->total_time)
+            .Key("items"s).Value(items)
+        .EndDict()
+        .Build();
+}
 
 }
