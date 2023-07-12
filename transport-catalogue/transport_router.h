@@ -43,6 +43,7 @@ private:
     const std::vector<const Bus*>& buses_;
     const TransportCatalogue& cat_;
     RoutingSettings settings_;
+    graph::DirectedWeightedGraph<double> graph_;
     const graph::Router<double> router_;
 
     graph::DirectedWeightedGraph<double> InitGraph();

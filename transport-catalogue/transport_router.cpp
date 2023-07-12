@@ -12,7 +12,8 @@ TransportRouter::TransportRouter(
     , buses_(buses)
     , cat_(cat)
     , settings_(std::move(settings))
-    , router_(InitGraph())
+    , graph_(InitGraph())
+    , router_(graph_)
 {
 }
 
