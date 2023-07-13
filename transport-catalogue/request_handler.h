@@ -24,7 +24,7 @@ private:
     const std::vector<const Stop*> sorted_stops_;
     const std::vector<const Bus*> sorted_buses_;
     renderer::MapRenderer& renderer_;
-    const catalogue::router::TransportRouter router_;
+    const catalogue::router::TransportRouter transport_router_;
 
     std::vector<const Stop*> GetSortedStops() const;
     std::vector<const Bus*> GetSortedBuses() const;

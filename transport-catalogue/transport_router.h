@@ -1,3 +1,4 @@
+#pragma once
 #include "graph.h"
 #include "router.h"
 #include "domain.h"
@@ -22,8 +23,8 @@ struct RouteInfo {
 };
 
 class TransportRouter {
-
 public:
+    using RouteGraph = graph::DirectedWeightedGraph<double>;
     TransportRouter(
         const std::vector<const Stop*>& stops,
         const std::vector<const Bus*>& buses,
@@ -43,10 +44,11 @@ private:
     const std::vector<const Bus*>& buses_;
     const TransportCatalogue& cat_;
     RoutingSettings settings_;
-    graph::DirectedWeightedGraph<double> graph_;
+    RouteGraph graph_;
     const graph::Router<double> router_;
 
-    graph::DirectedWeightedGraph<double> InitGraph();
+    RouteGraph InitGraph();
+    void AddToGraph(RouteGraph& g, const Bus* bus, size_t start_id, size_t end_id);
 };
 
 }

@@ -10,7 +10,7 @@ RequestHandler::RequestHandler(
   , sorted_stops_(GetSortedStops())
   , sorted_buses_(GetSortedBuses())
   , renderer_(renderer)
-  , router_(sorted_stops_, sorted_buses_, cat_, routing_settings)
+  , transport_router_(sorted_stops_, sorted_buses_, cat_, routing_settings)
 {
 }
 
@@ -21,7 +21,7 @@ svg::Document RequestHandler::RenderMap() const {
 std::optional<catalogue::router::RouteInfo> RequestHandler::FormRoute(
     const std::string& from, const std::string& to
 ) const {
-    return router_.BuildRoute(from, to);
+    return transport_router_.BuildRoute(from, to);
 }
 
 template <typename T>
