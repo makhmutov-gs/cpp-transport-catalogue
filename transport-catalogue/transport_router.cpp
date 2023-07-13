@@ -20,13 +20,14 @@ TransportRouter::TransportRouter(
 std::optional<RouteInfo> TransportRouter::BuildRoute(
     const std::string& from, const std::string& to
 ) const {
-    auto from_it = std::find_if(stops_.begin(), stops_.end(),
-            [&from](const Stop* s) { return s->name == from; }
-    );
+    auto FindStopByName = [this](const std::string& name) {
+        return std::find_if(stops_.begin(), stops_.end(),
+            [&name] (const Stop* s) { return s->name == name; }
+        );
+    };
 
-    auto to_it = std::find_if(stops_.begin(), stops_.end(),
-        [&to](const Stop* s) { return s->name == to; }
-    );
+    auto from_it = FindStopByName(from);
+    auto to_it = FindStopByName(to);
 
     if (from_it == stops_.end() || to_it == stops_.end()) {
         return std::nullopt;
@@ -40,7 +41,6 @@ std::optional<RouteInfo> TransportRouter::BuildRoute(
         return std::nullopt;
     }
 
-    // TODO: сделать инициализацию через std::transform
     RouteInfo result;
     result.total_time = route->weight;
 
