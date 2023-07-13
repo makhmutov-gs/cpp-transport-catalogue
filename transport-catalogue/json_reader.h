@@ -35,7 +35,7 @@ private:
         ROUTE,
     };
 
-    struct RouteInfo {
+    struct RouteQueryInfo {
         std::string from;
         std::string to;
     };
@@ -43,7 +43,7 @@ private:
     struct OutQuery {
         int id;
         OutQueryType type;
-        std::variant<std::string, RouteInfo> payload;
+        std::variant<std::string, RouteQueryInfo> payload;
     };
 
     std::vector<OutQuery> out_queries_;

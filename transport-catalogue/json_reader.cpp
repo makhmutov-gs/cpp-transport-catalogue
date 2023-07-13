@@ -105,7 +105,7 @@ void JsonReader::ReadOutputQueries(const json::Array& out_queries) {
             );
         } else if (type == "Route"s) {
             out_queries_.push_back(
-                {id, OutQueryType::ROUTE, RouteInfo{query.AsDict().at("from"s).AsString(), query.AsDict().at("to"s).AsString()}}
+                {id, OutQueryType::ROUTE, RouteQueryInfo{query.AsDict().at("from"s).AsString(), query.AsDict().at("to"s).AsString()}}
             );
         }
     }
@@ -277,7 +277,7 @@ json::Node JsonReader::FormMapQuery(
     const OutQuery& query,
     const requests::RequestHandler& handler
 ) const {
-    RouteInfo route_info = std::get<RouteInfo>(query.payload);
+    RouteQueryInfo route_info = std::get<RouteQueryInfo>(query.payload);
     auto route = handler.FormRoute(route_info.from, route_info.to);
 
     if (!route.has_value()) {

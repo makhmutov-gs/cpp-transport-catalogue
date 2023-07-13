@@ -17,7 +17,7 @@ TransportRouter::TransportRouter(
 {
 }
 
-std::optional<RouteInfo> TransportRouter::BuildRoute(
+std::optional<TransportRouter::RouteInfo> TransportRouter::BuildRoute(
     const std::string& from, const std::string& to
 ) const {
     auto FindStopByName = [this](const std::string& name) {
@@ -60,7 +60,7 @@ void TransportRouter::AddToGraph(RouteGraph& g, const Bus* bus, size_t start_id,
         size_t from_id = FindStopId(bus->stops[i]);
         double current_distance = 0;
         for (size_t j = i + 1; j < end_id; ++j) {
-            size_t to_id = std::distance(stops_.begin(), std::find(stops_.begin(), stops_.end(), bus->stops[j]));
+            size_t to_id = FindStopId(bus->stops[j]);
             if (j == i + 1) {
                 current_distance += cat_.GetRoadDistance(bus->stops[i]->name, bus->stops[j]->name).value();
             } else {
@@ -73,8 +73,8 @@ void TransportRouter::AddToGraph(RouteGraph& g, const Bus* bus, size_t start_id,
     }
 }
 
-graph::DirectedWeightedGraph<double> TransportRouter::InitGraph() {
-    graph::DirectedWeightedGraph<double> g(stops_.size() * 2);
+TransportRouter::RouteGraph TransportRouter::InitGraph() {
+    RouteGraph g(stops_.size() * 2);
 
     for (size_t i = 0; i < stops_.size(); ++i) {
         double time = static_cast<double>(settings_.bus_wait_time);
@@ -91,6 +91,7 @@ graph::DirectedWeightedGraph<double> TransportRouter::InitGraph() {
             AddToGraph(g, bus, end_stop_idx, bus->stops.size());
         }
     }
+
     return g;
 }
 

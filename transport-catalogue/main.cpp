@@ -4,9 +4,6 @@
 #include "map_renderer.h"
 #include "request_handler.h"
 
-#include "graph.h"
-#include "router.h"
-
 int main() {
     using namespace catalogue;
     using namespace catalogue::reader;

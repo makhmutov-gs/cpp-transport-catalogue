@@ -18,7 +18,10 @@ void TransportCatalogue::SetRoadDistance(
     ] = distance;
 }
 
-std::optional<double> TransportCatalogue::GetRoadDistance(const std::string& from, const std::string& to) const {
+std::optional<double> TransportCatalogue::GetRoadDistance(
+    const std::string& from,
+    const std::string& to
+) const {
     if (stopname_to_stop_.count(from) == 0 || stopname_to_stop_.count(to) == 0) {
         return std::nullopt;
     }

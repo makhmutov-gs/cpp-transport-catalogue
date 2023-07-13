@@ -18,7 +18,7 @@ svg::Document RequestHandler::RenderMap() const {
     return renderer_.Render(sorted_buses_, sorted_stops_);
 }
 
-std::optional<catalogue::router::RouteInfo> RequestHandler::FormRoute(
+std::optional<catalogue::router::TransportRouter::RouteInfo> RequestHandler::FormRoute(
     const std::string& from, const std::string& to
 ) const {
     return transport_router_.BuildRoute(from, to);

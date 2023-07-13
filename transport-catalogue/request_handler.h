@@ -15,7 +15,7 @@ public:
 
     svg::Document RenderMap() const;
 
-    std::optional<catalogue::router::RouteInfo> FormRoute(
+    std::optional<catalogue::router::TransportRouter::RouteInfo> FormRoute(
         const std::string& from, const std::string& to
     ) const;
 

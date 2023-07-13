@@ -11,19 +11,21 @@ using catalogue::domain::Stop;
 using catalogue::domain::RoutingSettings;
 using catalogue::TransportCatalogue;
 
-struct EdgeInfo {
-    std::string_view name;
-    size_t span_count;
-    double time;
-};
-
-struct RouteInfo {
-    double total_time;
-    std::vector<EdgeInfo> edges;
-};
 
 class TransportRouter {
+private:
+    struct EdgeInfo {
+        std::string_view name;
+        size_t span_count;
+        double time;
+    };
+
 public:
+    struct RouteInfo {
+        double total_time;
+        std::vector<EdgeInfo> edges;
+    };
+
     using RouteGraph = graph::DirectedWeightedGraph<double>;
     TransportRouter(
         const std::vector<const Stop*>& stops,
