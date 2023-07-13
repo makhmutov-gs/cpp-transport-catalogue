@@ -33,6 +33,7 @@ void JsonReader::ProcessInQueries(TransportCatalogue& cat) {
 
 void JsonReader::PrintOutQueries(TransportCatalogue& cat, const requests::RequestHandler& handler, std::ostream& out) {
     json::Array to_print;
+
     for (const auto& query : out_queries_) {
         switch (query.type) {
             case OutQueryType::STOP:
@@ -49,9 +50,7 @@ void JsonReader::PrintOutQueries(TransportCatalogue& cat, const requests::Reques
                 break;
         }
     }
-    // for (const auto& query : route_queries_) {
-    //     to_print.push_back(FormRouteQuery(query, handler));
-    // }
+
     json::Print(json::Document(to_print), out);
 }
 
@@ -208,6 +207,15 @@ void JsonReader::AddBusQuery(const json::Dict& query) {
     bus_queries_.push_back({name, stops, is_roundtrip});
 }
 
+json::Node NotFound(int id) {
+    return json::Builder{}
+        .StartDict()
+            .Key("error_message"s).Value("not found"s)
+            .Key("request_id"s).Value(id)
+        .EndDict()
+        .Build();
+}
+
 json::Node JsonReader::FormStopQuery(const OutQuery& query, const TransportCatalogue& cat) const {
     auto bus_list = cat.GetBusesByStop(std::get<std::string>(query.payload));
     if (bus_list) {
@@ -225,12 +233,7 @@ json::Node JsonReader::FormStopQuery(const OutQuery& query, const TransportCatal
             .Build();
 
     } else {
-        return json::Builder{}
-            .StartDict()
-                .Key("error_message"s).Value("not found"s)
-                .Key("request_id"s).Value(query.id)
-            .EndDict()
-            .Build();
+        return NotFound(query.id);
     }
 }
 
@@ -248,12 +251,7 @@ json::Node JsonReader::FormBusQuery(const OutQuery& query, TransportCatalogue& c
             .EndDict()
             .Build();
     } else {
-        return json::Builder{}
-            .StartDict()
-                .Key("error_message"s).Value("not found"s)
-                .Key("request_id"s).Value(query.id)
-            .EndDict()
-            .Build();
+        return NotFound(query.id);
     }
 }
 
@@ -282,12 +280,7 @@ json::Node JsonReader::FormMapQuery(
     auto route = handler.FormRoute(stop_pair.first, stop_pair.second);
 
     if (!route.has_value()) {
-        return json::Builder{}
-            .StartDict()
-                .Key("error_message"s).Value("not found"s)
-                .Key("request_id"s).Value(query.id)
-            .EndDict()
-            .Build();
+        return NotFound(query.id);
     }
 
     json::Array items;
