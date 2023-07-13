@@ -20,19 +20,20 @@ TransportRouter::TransportRouter(
 std::optional<RouteInfo> TransportRouter::BuildRoute(
     const std::string& from, const std::string& to
 ) const {
-    size_t from_id = std::distance(
-        stops_.begin(),
-        std::find_if(stops_.begin(), stops_.end(),
+    auto from_it = std::find_if(stops_.begin(), stops_.end(),
             [&from](const Stop* s) { return s->name == from; }
-        )
     );
 
-    size_t to_id = std::distance(
-        stops_.begin(),
-        std::find_if(stops_.begin(), stops_.end(),
-            [&to](const Stop* s) { return s->name == to; }
-        )
+    auto to_it = std::find_if(stops_.begin(), stops_.end(),
+        [&to](const Stop* s) { return s->name == to; }
     );
+
+    if (from_it == stops_.end() || to_it == stops_.end()) {
+        return std::nullopt;
+    }
+
+    size_t from_id = std::distance(stops_.begin(), from_it);
+    size_t to_id = std::distance(stops_.begin(), to_it);
 
     auto route = router_.BuildRoute(from_id * 2, to_id * 2);
     if (!route) {

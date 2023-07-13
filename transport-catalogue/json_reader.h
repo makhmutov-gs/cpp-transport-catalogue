@@ -4,6 +4,7 @@
 #include "transport_catalogue.h"
 #include "map_renderer.h"
 #include "request_handler.h"
+#include <variant>
 
 namespace catalogue::reader {
 
@@ -31,13 +32,13 @@ private:
         BUS,
         STOP,
         MAP,
-        //ROUTE,
+        ROUTE,
     };
 
     struct OutQuery {
         int id;
         OutQueryType type;
-        std::string name;
+        std::variant<std::string, std::pair<std::string, std::string>> payload;
     };
 
     struct RouteQuery {
@@ -67,7 +68,7 @@ private:
     json::Node FormStopQuery(const OutQuery& query, const TransportCatalogue& cat) const;
     json::Node FormBusQuery(const OutQuery& query, TransportCatalogue& cat) const;
     json::Node FormMapQuery(const OutQuery& query, const requests::RequestHandler& handler) const;
-    json::Node FormRouteQuery(const RouteQuery& query, const requests::RequestHandler& handler) const;
+    json::Node FormRouteQuery(const OutQuery& query, const requests::RequestHandler& handler) const;
 };
 
 }

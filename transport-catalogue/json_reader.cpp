@@ -44,11 +44,14 @@ void JsonReader::PrintOutQueries(TransportCatalogue& cat, const requests::Reques
             case OutQueryType::MAP:
                 to_print.push_back(FormMapQuery(query, handler));
                 break;
+            case OutQueryType::ROUTE:
+                to_print.push_back(FormRouteQuery(query, handler));
+                break;
         }
     }
-    for (const auto& query : route_queries_) {
-        to_print.push_back(FormRouteQuery(query, handler));
-    }
+    // for (const auto& query : route_queries_) {
+    //     to_print.push_back(FormRouteQuery(query, handler));
+    // }
     json::Print(json::Document(to_print), out);
 }
 
@@ -101,8 +104,8 @@ void JsonReader::ReadOutputQueries(const json::Array& out_queries) {
                 {id, OutQueryType::MAP, {}}
             );
         } else if (type == "Route"s) {
-            route_queries_.push_back(
-                {id, query.AsDict().at("from"s).AsString(), query.AsDict().at("to"s).AsString()}
+            out_queries_.push_back(
+                {id, OutQueryType::ROUTE, std::pair{query.AsDict().at("from"s).AsString(), query.AsDict().at("to"s).AsString()}}
             );
         }
     }
@@ -206,7 +209,7 @@ void JsonReader::AddBusQuery(const json::Dict& query) {
 }
 
 json::Node JsonReader::FormStopQuery(const OutQuery& query, const TransportCatalogue& cat) const {
-    auto bus_list = cat.GetBusesByStop(query.name);
+    auto bus_list = cat.GetBusesByStop(std::get<std::string>(query.payload));
     if (bus_list) {
         std::set<std::string> buses_string;
         for (const auto bus_sv : *bus_list) {
@@ -232,7 +235,7 @@ json::Node JsonReader::FormStopQuery(const OutQuery& query, const TransportCatal
 }
 
 json::Node JsonReader::FormBusQuery(const OutQuery& query, TransportCatalogue& cat) const {
-    auto bus_info = cat.GetBusInfo(query.name);
+    auto bus_info = cat.GetBusInfo(std::get<std::string>(query.payload));
 
     if (bus_info) {
         return json::Builder{}
@@ -272,10 +275,11 @@ json::Node JsonReader::FormMapQuery(
 }
 
  json::Node JsonReader::FormRouteQuery(
-    const RouteQuery& query,
+    const OutQuery& query,
     const requests::RequestHandler& handler
 ) const {
-    auto route = handler.FormRoute(query.from, query.to);
+    std::pair<std::string, std::string> stop_pair = std::get<std::pair<std::string, std::string>>(query.payload);
+    auto route = handler.FormRoute(stop_pair.first, stop_pair.second);
 
     if (!route.has_value()) {
         return json::Builder{}
