@@ -273,7 +273,7 @@ json::Node JsonReader::FormMapQuery(
         .Build();
 }
 
- json::Node JsonReader::FormRouteQuery(
+json::Node JsonReader::FormRouteQuery(
     const OutQuery& query,
     const requests::RequestHandler& handler
 ) const {

@@ -27,6 +27,7 @@ public:
     };
 
     using RouteGraph = graph::DirectedWeightedGraph<double>;
+
     TransportRouter(
         const std::vector<const Stop*>& stops,
         const std::vector<const Bus*>& buses,
