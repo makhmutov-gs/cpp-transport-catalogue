@@ -10,6 +10,7 @@ inline const std::string BASE_REQUESTS = "base_requests";
 inline const std::string STAT_REQUESTS = "stat_requests";
 inline const std::string RENDER_SETTINGS = "render_settings";
 inline const std::string ROUTING_SETTINGS = "routing_settings";
+constexpr double KPH_TO_MPM = 1000.0 / 60.0; // Коэффициент пересчета из км/ч в метры/минута
 
 JsonReader::JsonReader(std::istream& in, bool read_output_queries) {
     ReadDocument(in, read_output_queries);
@@ -104,7 +105,7 @@ void JsonReader::ReadOutputQueries(const json::Array& out_queries) {
             );
         } else if (type == "Route"s) {
             out_queries_.push_back(
-                {id, OutQueryType::ROUTE, std::pair{query.AsDict().at("from"s).AsString(), query.AsDict().at("to"s).AsString()}}
+                {id, OutQueryType::ROUTE, RouteInfo{query.AsDict().at("from"s).AsString(), query.AsDict().at("to"s).AsString()}}
             );
         }
     }
@@ -165,7 +166,7 @@ void JsonReader::ReadRenderSettings(const json::Dict& settings_dict) {
 
 void JsonReader::ReadRoutingSettings(const json::Dict& settings) {
     routing_settings_.bus_wait_time = settings.at("bus_wait_time"s).AsInt();
-    routing_settings_.bus_velocity = settings.at("bus_velocity").AsDouble();
+    routing_settings_.bus_velocity = settings.at("bus_velocity").AsDouble() * KPH_TO_MPM;
 }
 
 renderer::Settings JsonReader::GetRenderSettings() const {
@@ -276,8 +277,8 @@ json::Node JsonReader::FormMapQuery(
     const OutQuery& query,
     const requests::RequestHandler& handler
 ) const {
-    std::pair<std::string, std::string> stop_pair = std::get<std::pair<std::string, std::string>>(query.payload);
-    auto route = handler.FormRoute(stop_pair.first, stop_pair.second);
+    RouteInfo route_info = std::get<RouteInfo>(query.payload);
+    auto route = handler.FormRoute(route_info.from, route_info.to);
 
     if (!route.has_value()) {
         return NotFound(query.id);

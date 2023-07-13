@@ -35,20 +35,18 @@ private:
         ROUTE,
     };
 
-    struct OutQuery {
-        int id;
-        OutQueryType type;
-        std::variant<std::string, std::pair<std::string, std::string>> payload;
-    };
-
-    struct RouteQuery {
-        int id;
+    struct RouteInfo {
         std::string from;
         std::string to;
     };
 
+    struct OutQuery {
+        int id;
+        OutQueryType type;
+        std::variant<std::string, RouteInfo> payload;
+    };
+
     std::vector<OutQuery> out_queries_;
-    std::vector<RouteQuery> route_queries_;
 
     std::vector<Stop> stop_queries_;
     std::vector<BusQuery> bus_queries_;

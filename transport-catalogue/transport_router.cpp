@@ -66,7 +66,7 @@ void TransportRouter::AddToGraph(RouteGraph& g, const Bus* bus, size_t start_id,
             } else {
                 current_distance += cat_.GetRoadDistance(bus->stops[j-1]->name, bus->stops[j]->name).value();
             }
-            double time = current_distance / (settings_.bus_velocity * 1000 / 60);
+            double time = current_distance / settings_.bus_velocity;
             g.AddEdge({from_id * 2 + 1, to_id * 2, time});
             edges_info_.push_back({bus->name, j - i, time});
         }
