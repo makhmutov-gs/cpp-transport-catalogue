@@ -1,4 +1,5 @@
 #include "transport_catalogue.h"
+#include <transport_catalogue.pb.h>
 
 namespace catalogue {
 
@@ -111,6 +112,77 @@ double TransportCatalogue::CalcRoadRouteLength(const std::vector<const Stop*>& s
 
     }
     return result;
+}
+
+void TransportCatalogue::SaveTo(const filesystem::path& path) const {
+    ofstream out_file(path, ios::binary);
+
+    proto_transport::TransportCatalogue proto_cat;
+    std::unordered_map<const Stop*, size_t> stop_to_id;
+    size_t id = 0;
+    for (const auto& s : stops_) {
+        stop_to_id[&s] = id;
+        ++id;
+
+        proto_transport::Stop proto_stop;
+        proto_stop.set_name(s.name);
+        proto_stop.set_id(id);
+
+        proto_transport::Coordinates proto_coords;
+        proto_coords.set_lat(s.coords.lat);
+        proto_coords.set_lng(s.coords.lng);
+
+        proto_stop.set_coords(proto_coords);
+
+        *proto_cat.add_stop() = proto_stop;
+    }
+
+    for (const auto& s_from : stops_) {
+        int from = stop_to_id[&s];
+        for (const auto& s_to : stops_) {
+            if (&s_from == &s_to) {
+                continue;
+            }
+            int to = stop_to_id[&s];
+            double meters = GetRoadDistance(s_from.name, s_to);
+
+            proto_transport::Distance proto_distance;
+            proto_distance.set_from(from);
+            proto_distance.set_to(to);
+            proto_distance.set_meters(meters);
+
+            *proto_cat.add_distance() = proto_distance;
+        }
+    }
+
+    for (const auto& b : buses_) {
+        proto_transport::Bus proto_bus;
+        proto_bus.set_name(b.name);
+        proto_bus.set_is_roundtrip(b.is_roundtrip);
+
+        for (const auto s_ptr : b.stops) {
+            id = stop_to_id[s_ptr];
+            *proto_bus.add_stop() = id;
+        }
+    }
+
+    proto_cat.SerializeToOstream(&ofstream);
+}
+
+static std::optional<TransportCatalogue> TransportCatalogue::FromFile(const filesystem::path& path) {
+    ifstream in_file(path, ios::binary);
+    proto_transport::TransportCatalogue proto_cat;
+    TransportCatalogue cat;
+    if (!proto_cat.ParseFromIstream(&in_file)) {
+        return nullopt;
+    }
+
+    std::unordered_map<size_t, std::string_view> stopname_to_id;
+    for (size_t i = 0; i < proto_cat.stops_size(); ++i) {
+        proto_transport::Stop proto_stop;
+
+        cat.AddStop(Stop{proto_stop.name(), {proto_stop.coords().lat(), proto_stop.coords().lng()}});
+    }
 }
 
 }

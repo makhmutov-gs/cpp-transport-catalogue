@@ -59,6 +59,8 @@ public:
 
     std::optional<std::set<std::string_view>> GetBusesByStop(const std::string& name) const;
 
+    void SaveTo(std::ostream& output) const;
+
 private:
     std::deque<Stop> stops_;
     std::deque<Bus> buses_;

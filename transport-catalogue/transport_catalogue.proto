@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package proto_cat;
+
+message Bus {
+    string name = 1;
+    repeated int32 stop = 2;
+    bool is_roundtrip = 3;
+}
+
+message Coordinates {
+    double lat = 1;
+    double lng = 2;
+}
+
+message Stop {
+    string name = 1;
+    int32 id = 2;
+    Coordinates coords = 3;
+}
+
+message Distance {
+    int32 from = 1;
+    int32 to = 2;
+    double meters = 3;
+}
+
+message TransportCatalogue {
+    repeated Bus bus = 1;
+    repeated Stop stop = 2;
+    repeated Distance distances = 3;
+}
