@@ -36,3 +36,5 @@
 
 # macOS files
 *.DS_Store
+
+/build-cmake

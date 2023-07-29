@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package proto_cat;
+package proto_transport;
 
 message Bus {
     string name = 1;
@@ -28,5 +28,5 @@ message Distance {
 message TransportCatalogue {
     repeated Bus bus = 1;
     repeated Stop stop = 2;
-    repeated Distance distances = 3;
+    repeated Distance distance = 3;
 }

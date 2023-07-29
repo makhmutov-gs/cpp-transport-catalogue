@@ -9,6 +9,7 @@
 #include <set>
 #include <optional>
 #include "domain.h"
+#include <filesystem>
 
 namespace catalogue {
 
@@ -59,7 +60,7 @@ public:
 
     std::optional<std::set<std::string_view>> GetBusesByStop(const std::string& name) const;
 
-    void SaveTo(std::ostream& output) const;
+    void SaveTo(const std::filesystem::path& path) const;
 
 private:
     std::deque<Stop> stops_;
