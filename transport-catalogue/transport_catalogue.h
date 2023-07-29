@@ -8,8 +8,10 @@
 #include <utility>
 #include <set>
 #include <optional>
-#include "domain.h"
 #include <filesystem>
+
+#include "domain.h"
+#include "map_renderer.h"
 
 namespace catalogue {
 
@@ -60,7 +62,7 @@ public:
 
     std::optional<std::set<std::string_view>> GetBusesByStop(const std::string& name) const;
 
-    void SaveTo(const std::filesystem::path& path) const;
+    void SaveTo(const std::filesystem::path& path, const renderer::Settings& settings) const;
 
 private:
     std::deque<Stop> stops_;
@@ -75,6 +77,6 @@ private:
     double CalcRoadRouteLength(const std::vector<const Stop*>& stops) const;
 };
 
-std::optional<TransportCatalogue> FromFile(const std::filesystem::path& path);
+std::tuple<TransportCatalogue, renderer::Settings> FromFile(const std::filesystem::path& path);
 
 }

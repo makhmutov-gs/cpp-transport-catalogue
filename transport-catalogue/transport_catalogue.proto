@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "map_renderer.proto";
+
 package proto_transport;
 
 message Bus {
@@ -29,4 +31,5 @@ message TransportCatalogue {
     repeated Bus bus = 1;
     repeated Stop stop = 2;
     repeated Distance distance = 3;
+    proto_render.RendererSettings settings = 4;
 }

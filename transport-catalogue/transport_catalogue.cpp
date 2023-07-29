@@ -1,6 +1,8 @@
 #include "transport_catalogue.h"
+#include "svg.h"
 #include <fstream>
 #include <transport_catalogue.pb.h>
+#include <map_renderer.pb.h>
 
 namespace catalogue {
 
@@ -116,7 +118,41 @@ double TransportCatalogue::CalcRoadRouteLength(const std::vector<const Stop*>& s
     return result;
 }
 
-void TransportCatalogue::SaveTo(const std::filesystem::path& path) const {
+struct ProtoColorGetter {
+    proto_render::Color operator()(std::monostate) {
+        proto_render::Color proto_color;
+        proto_color.set_type(proto_render::Color_TYPE::Color_TYPE_NONE);
+        return proto_color;
+    }
+
+    proto_render::Color operator()(const std::string& str) {
+        proto_render::Color proto_color;
+        proto_color.set_type(proto_render::Color_TYPE::Color_TYPE_STRING);
+        proto_color.set_name(str);
+        return proto_color;
+    }
+
+    proto_render::Color operator()(const svg::Rgb& rgb) {
+        proto_render::Color proto_color;
+        proto_color.set_type(proto_render::Color_TYPE::Color_TYPE_RGB);
+        proto_color.set_red(rgb.red);
+        proto_color.set_green(rgb.green);
+        proto_color.set_blue(rgb.blue);
+        return proto_color;
+    }
+
+    proto_render::Color operator()(const svg::Rgba& rgba) {
+        proto_render::Color proto_color;
+        proto_color.set_type(proto_render::Color_TYPE::Color_TYPE_RGBA);
+        proto_color.set_red(rgba.red);
+        proto_color.set_green(rgba.green);
+        proto_color.set_blue(rgba.blue);
+        proto_color.set_opacity(rgba.opacity);
+        return proto_color;
+    }
+};
+
+void TransportCatalogue::SaveTo(const std::filesystem::path& path, const renderer::Settings& settings) const {
     std::ofstream out_file(path, std::ios::binary);
 
     proto_transport::TransportCatalogue proto_cat;
@@ -173,16 +209,63 @@ void TransportCatalogue::SaveTo(const std::filesystem::path& path) const {
         *proto_cat.add_bus() = proto_bus;
     }
 
+    proto_render::RendererSettings proto_settings;
+    proto_settings.set_width(settings.width);
+    proto_settings.set_height(settings.heigth);
+    proto_settings.set_padding(settings.padding);
+    proto_settings.set_line_width(settings.line_width);
+    proto_settings.set_stop_radius(settings.stop_radius);
+    proto_settings.set_bus_label_font_size(settings.bus_label_font_size);
+
+    proto_render::Point bus_label_offset;
+    bus_label_offset.set_x(settings.bus_label_offset.x);
+    bus_label_offset.set_y(settings.bus_label_offset.y);
+
+    *proto_settings.mutable_bus_label_offset() = bus_label_offset;
+
+    proto_render::Point stop_label_offset;
+    stop_label_offset.set_x(settings.stop_label_offset.x);
+    stop_label_offset.set_y(settings.stop_label_offset.y);
+
+    *proto_settings.mutable_stop_label_offset() = stop_label_offset;
+
+    proto_settings.set_stop_label_font_size(settings.stop_label_font_size);
+
+    *proto_settings.mutable_underlayer_color() = std::visit(ProtoColorGetter(), settings.underlayer_color);
+
+    proto_settings.set_underlayer_width(settings.underlayer_width);
+
+    for (const auto& c : settings.color_palette) {
+        *proto_settings.add_color_palette() = std::visit(ProtoColorGetter(), c);
+    }
+
+    *proto_cat.mutable_settings() = proto_settings;
+
     proto_cat.SerializeToOstream(&out_file);
 }
 
-std::optional<TransportCatalogue> FromFile(const std::filesystem::path& path) {
+svg::Color GetColorFromProto(const proto_render::Color& proto_color) {
+    switch (proto_color.type()) {
+        case proto_render::Color_TYPE::Color_TYPE_NONE:
+            return std::monostate();
+            break;
+        case proto_render::Color_TYPE::Color_TYPE_STRING:
+            return proto_color.name();
+            break;
+        case proto_render::Color_TYPE::Color_TYPE_RGB:
+            return svg::Rgb(proto_color.red(), proto_color.green(), proto_color.blue());
+            break;
+        case proto_render::Color_TYPE::Color_TYPE_RGBA:
+            return svg::Rgba(proto_color.red(), proto_color.green(), proto_color.blue(), proto_color.opacity());
+            break;
+    }
+}
+
+std::tuple<TransportCatalogue, renderer::Settings> FromFile(const std::filesystem::path& path) {
     std::ifstream in_file(path, std::ios::binary);
     proto_transport::TransportCatalogue proto_cat;
     TransportCatalogue cat;
-    if (!proto_cat.ParseFromIstream(&in_file)) {
-        return std::nullopt;
-    }
+    proto_cat.ParseFromIstream(&in_file);
 
     std::unordered_map<int32_t, std::string> id_to_stopname;
     for (int i = 0; i < proto_cat.stop_size(); ++i) {
@@ -207,12 +290,37 @@ std::optional<TransportCatalogue> FromFile(const std::filesystem::path& path) {
         std::vector<std::string> stops;
         for (int j = 0; j < proto_bus.stop_size(); ++j) {
             int id = proto_bus.stop(j);
-            stops.push_back(std::string(id_to_stopname[id]));
+            stops.push_back(id_to_stopname[id]);
         }
         cat.AddBus(proto_bus.name(), stops, proto_bus.is_roundtrip());
     }
 
-    return cat;
+    renderer::Settings settings;
+    proto_render::RendererSettings proto_settings = proto_cat.settings();
+    settings.width = proto_settings.width();
+    settings.heigth = proto_settings.height();
+    settings.padding = proto_settings.padding();
+    settings.line_width = proto_settings.line_width();
+    settings.stop_radius = proto_settings.stop_radius();
+    settings.bus_label_font_size = proto_settings.bus_label_font_size();
+
+    proto_render::Point bus_label_offset = proto_settings.bus_label_offset();
+    settings.bus_label_offset.x = bus_label_offset.x();
+    settings.bus_label_offset.y = bus_label_offset.y();
+
+    proto_render::Point stop_label_offset = proto_settings.stop_label_offset();
+    settings.stop_label_offset.x = stop_label_offset.x();
+    settings.stop_label_offset.y = stop_label_offset.y();
+
+    settings.stop_label_font_size = proto_settings.stop_label_font_size();
+    settings.underlayer_color = GetColorFromProto(proto_settings.underlayer_color());
+    settings.underlayer_width = proto_settings.underlayer_width();
+
+    for (int i = 0; i < proto_settings.color_palette_size(); ++i) {
+        settings.color_palette.push_back(GetColorFromProto(proto_settings.color_palette(i)));
+    }
+
+    return {std::move(cat), settings};
 }
 
 
