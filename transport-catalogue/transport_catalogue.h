@@ -62,7 +62,7 @@ public:
 
     std::optional<std::set<std::string_view>> GetBusesByStop(const std::string& name) const;
 
-    void SaveTo(
+    void SaveWithSettings(
         const std::filesystem::path& path,
         const renderer::Settings& render_settings,
         const domain::RoutingSettings& routing_settings

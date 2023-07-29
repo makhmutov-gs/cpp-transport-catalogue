@@ -2,6 +2,9 @@
 #include <string>
 #include <vector>
 #include "geo.h"
+#include "svg.h"
+
+#include <transport_catalogue.pb.h>
 
 namespace catalogue::domain {
 
@@ -21,5 +24,6 @@ struct RoutingSettings {
     double bus_velocity;
 };
 
+svg::Color GetColorFromProto(const proto_render::Color& proto_color);
 
 }

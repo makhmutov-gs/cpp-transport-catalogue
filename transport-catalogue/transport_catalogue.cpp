@@ -2,7 +2,6 @@
 #include "svg.h"
 #include <fstream>
 #include <transport_catalogue.pb.h>
-#include <map_renderer.pb.h>
 
 namespace catalogue {
 
@@ -152,7 +151,7 @@ struct ProtoColorGetter {
     }
 };
 
-void TransportCatalogue::SaveTo(
+void TransportCatalogue::SaveWithSettings(
     const std::filesystem::path& path,
     const renderer::Settings& render_settings,
     const domain::RoutingSettings& routing_settings
@@ -253,27 +252,14 @@ void TransportCatalogue::SaveTo(
     proto_cat.SerializeToOstream(&out_file);
 }
 
-svg::Color GetColorFromProto(const proto_render::Color& proto_color) {
-    switch (proto_color.type()) {
-        case proto_render::Color_TYPE::Color_TYPE_NONE:
-            return std::monostate();
-            break;
-        case proto_render::Color_TYPE::Color_TYPE_STRING:
-            return proto_color.name();
-            break;
-        case proto_render::Color_TYPE::Color_TYPE_RGB:
-            return svg::Rgb(proto_color.red(), proto_color.green(), proto_color.blue());
-            break;
-        case proto_render::Color_TYPE::Color_TYPE_RGBA:
-            return svg::Rgba(proto_color.red(), proto_color.green(), proto_color.blue(), proto_color.opacity());
-            break;
-    }
-}
+
 
 std::tuple<TransportCatalogue, renderer::Settings, domain::RoutingSettings> FromFile(const std::filesystem::path& path) {
     std::ifstream in_file(path, std::ios::binary);
+
     proto_transport::TransportCatalogue proto_cat;
     TransportCatalogue cat;
+
     proto_cat.ParseFromIstream(&in_file);
 
     std::unordered_map<int32_t, std::string> id_to_stopname;
@@ -322,11 +308,12 @@ std::tuple<TransportCatalogue, renderer::Settings, domain::RoutingSettings> From
     render_settings.stop_label_offset.y = stop_label_offset.y();
 
     render_settings.stop_label_font_size = proto_render_settings.stop_label_font_size();
-    render_settings.underlayer_color = GetColorFromProto(proto_render_settings.underlayer_color());
+
+    render_settings.underlayer_color = domain::GetColorFromProto(proto_render_settings.underlayer_color());
     render_settings.underlayer_width = proto_render_settings.underlayer_width();
 
     for (int i = 0; i < proto_render_settings.color_palette_size(); ++i) {
-        render_settings.color_palette.push_back(GetColorFromProto(proto_render_settings.color_palette(i)));
+        render_settings.color_palette.push_back(domain::GetColorFromProto(proto_render_settings.color_palette(i)));
     }
 
     domain::RoutingSettings routing_settings;
