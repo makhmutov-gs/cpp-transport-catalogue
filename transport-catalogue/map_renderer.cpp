@@ -2,6 +2,69 @@
 
 namespace catalogue::renderer {
 
+proto_render::RendererSettings RendererSettingsToProto(const Settings& settings) {
+    proto_render::RendererSettings proto_render_settings;
+    proto_render_settings.set_width(settings.width);
+    proto_render_settings.set_height(settings.heigth);
+    proto_render_settings.set_padding(settings.padding);
+    proto_render_settings.set_line_width(settings.line_width);
+    proto_render_settings.set_stop_radius(settings.stop_radius);
+    proto_render_settings.set_bus_label_font_size(settings.bus_label_font_size);
+
+    proto_render::Point proto_bus_label_offset;
+    proto_bus_label_offset.set_x(settings.bus_label_offset.x);
+    proto_bus_label_offset.set_y(settings.bus_label_offset.y);
+
+    *proto_render_settings.mutable_bus_label_offset() = proto_bus_label_offset;
+
+    proto_render::Point proto_stop_label_offset;
+    proto_stop_label_offset.set_x(settings.stop_label_offset.x);
+    proto_stop_label_offset.set_y(settings.stop_label_offset.y);
+
+    *proto_render_settings.mutable_stop_label_offset() = proto_stop_label_offset;
+
+    proto_render_settings.set_stop_label_font_size(settings.stop_label_font_size);
+
+    *proto_render_settings.mutable_underlayer_color() = std::visit(domain::ProtoColorGetter(), settings.underlayer_color);
+
+    proto_render_settings.set_underlayer_width(settings.underlayer_width);
+
+    for (const auto& c : settings.color_palette) {
+        *proto_render_settings.add_color_palette() = std::visit(domain::ProtoColorGetter(), c);
+    }
+
+    return proto_render_settings;
+}
+
+Settings RendererSettingFromProto(const proto_render::RendererSettings& proto_settings) {
+    Settings render_settings;
+    render_settings.width = proto_settings.width();
+    render_settings.heigth = proto_settings.height();
+    render_settings.padding = proto_settings.padding();
+    render_settings.line_width = proto_settings.line_width();
+    render_settings.stop_radius = proto_settings.stop_radius();
+    render_settings.bus_label_font_size = proto_settings.bus_label_font_size();
+
+    proto_render::Point proto_bus_label_offset = proto_settings.bus_label_offset();
+    render_settings.bus_label_offset.x = proto_bus_label_offset.x();
+    render_settings.bus_label_offset.y = proto_bus_label_offset.y();
+
+    proto_render::Point proto_stop_label_offset = proto_settings.stop_label_offset();
+    render_settings.stop_label_offset.x = proto_stop_label_offset.x();
+    render_settings.stop_label_offset.y = proto_stop_label_offset.y();
+
+    render_settings.stop_label_font_size = proto_settings.stop_label_font_size();
+
+    render_settings.underlayer_color = domain::GetColorFromProto(proto_settings.underlayer_color());
+    render_settings.underlayer_width = proto_settings.underlayer_width();
+
+    for (int i = 0; i < proto_settings.color_palette_size(); ++i) {
+        render_settings.color_palette.push_back(domain::GetColorFromProto(proto_settings.color_palette(i)));
+    }
+
+    return render_settings;
+}
+
 svg::Point SphereProjector::operator()(geo::Coordinates coords) const {
     return {
         (coords.lng - min_lon_) * zoom_coeff_ + padding_,

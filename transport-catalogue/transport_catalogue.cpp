@@ -1,5 +1,5 @@
 #include "transport_catalogue.h"
-#include "svg.h"
+#include "map_renderer.h"
 #include <fstream>
 #include <transport_catalogue.pb.h>
 
@@ -125,43 +125,34 @@ void TransportCatalogue::SaveWithSettings(
     std::ofstream out_file(path, std::ios::binary);
 
     proto_transport::TransportCatalogue proto_cat;
-    std::unordered_map<const Stop*, size_t> stop_to_id;
-    size_t id = 0;
+    std::unordered_map<const Stop*, int32_t> stop_to_id;
+
+    int32_t id = 0;
     for (const auto& s : stops_) {
         stop_to_id[&s] = id;
-
-        proto_transport::Stop proto_stop;
-        proto_stop.set_name(s.name);
-        proto_stop.set_id(static_cast<int32_t>(id));
-
-        proto_transport::Coordinates proto_coords;
-        proto_coords.set_lat(s.coords.lat);
-        proto_coords.set_lng(s.coords.lng);
-
-        *proto_stop.mutable_coords() = proto_coords;
-
-        *proto_cat.add_stop() = proto_stop;
-
+        *proto_cat.add_stop() = domain::StopToProto(s, id);
         ++id;
     }
 
     for (const auto& s_from : stops_) {
-        int32_t from = static_cast<int32_t>(stop_to_id[&s_from]);
+        int32_t from = stop_to_id[&s_from];
         for (const auto& s_to : stops_) {
             if (&s_from == &s_to) {
                 continue;
             }
-            int32_t to = static_cast<int32_t>(stop_to_id[&s_to]);
+            int32_t to = stop_to_id[&s_to];
             std::optional<double> meters = GetRoadDistance(s_from.name, s_to.name);
 
-            if (meters.has_value()) {
-                proto_transport::Distance proto_distance;
-                proto_distance.set_from(from);
-                proto_distance.set_to(to);
-                proto_distance.set_meters(*meters);
-
-                *proto_cat.add_distance() = proto_distance;
+            if (!meters.has_value()) {
+                continue;
             }
+
+            proto_transport::Distance proto_distance;
+            proto_distance.set_from(from);
+            proto_distance.set_to(to);
+            proto_distance.set_meters(*meters);
+
+            *proto_cat.add_distance() = proto_distance;
         }
     }
 
@@ -172,53 +163,17 @@ void TransportCatalogue::SaveWithSettings(
 
         for (const auto s_ptr : b.stops) {
             id = stop_to_id[s_ptr];
-            proto_bus.add_stop(static_cast<int32_t>(id));
+            proto_bus.add_stop(id);
         }
 
         *proto_cat.add_bus() = proto_bus;
     }
 
-    proto_render::RendererSettings proto_render_settings;
-    proto_render_settings.set_width(render_settings.width);
-    proto_render_settings.set_height(render_settings.heigth);
-    proto_render_settings.set_padding(render_settings.padding);
-    proto_render_settings.set_line_width(render_settings.line_width);
-    proto_render_settings.set_stop_radius(render_settings.stop_radius);
-    proto_render_settings.set_bus_label_font_size(render_settings.bus_label_font_size);
-
-    proto_render::Point bus_label_offset;
-    bus_label_offset.set_x(render_settings.bus_label_offset.x);
-    bus_label_offset.set_y(render_settings.bus_label_offset.y);
-
-    *proto_render_settings.mutable_bus_label_offset() = bus_label_offset;
-
-    proto_render::Point stop_label_offset;
-    stop_label_offset.set_x(render_settings.stop_label_offset.x);
-    stop_label_offset.set_y(render_settings.stop_label_offset.y);
-
-    *proto_render_settings.mutable_stop_label_offset() = stop_label_offset;
-
-    proto_render_settings.set_stop_label_font_size(render_settings.stop_label_font_size);
-
-    *proto_render_settings.mutable_underlayer_color() = std::visit(domain::ProtoColorGetter(), render_settings.underlayer_color);
-
-    proto_render_settings.set_underlayer_width(render_settings.underlayer_width);
-
-    for (const auto& c : render_settings.color_palette) {
-        *proto_render_settings.add_color_palette() = std::visit(domain::ProtoColorGetter(), c);
-    }
-
-    proto_router::RoutingSettings proto_routing_settings;
-    proto_routing_settings.set_bus_wait_time(routing_settings.bus_wait_time);
-    proto_routing_settings.set_bus_velocity(routing_settings.bus_velocity);
-
-    *proto_cat.mutable_render_settings() = proto_render_settings;
-    *proto_cat.mutable_routing_settings() = proto_routing_settings;
+    *proto_cat.mutable_render_settings() = renderer::RendererSettingsToProto(render_settings);
+    *proto_cat.mutable_routing_settings() = domain::RoutingSettingsToProto(routing_settings);
 
     proto_cat.SerializeToOstream(&out_file);
 }
-
-
 
 std::tuple<TransportCatalogue, renderer::Settings, domain::RoutingSettings> FromFile(const std::filesystem::path& path) {
     std::ifstream in_file(path, std::ios::binary);
@@ -256,40 +211,11 @@ std::tuple<TransportCatalogue, renderer::Settings, domain::RoutingSettings> From
         cat.AddBus(proto_bus.name(), stops, proto_bus.is_roundtrip());
     }
 
-    renderer::Settings render_settings;
-    proto_render::RendererSettings proto_render_settings = proto_cat.render_settings();
-    render_settings.width = proto_render_settings.width();
-    render_settings.heigth = proto_render_settings.height();
-    render_settings.padding = proto_render_settings.padding();
-    render_settings.line_width = proto_render_settings.line_width();
-    render_settings.stop_radius = proto_render_settings.stop_radius();
-    render_settings.bus_label_font_size = proto_render_settings.bus_label_font_size();
-
-    proto_render::Point bus_label_offset = proto_render_settings.bus_label_offset();
-    render_settings.bus_label_offset.x = bus_label_offset.x();
-    render_settings.bus_label_offset.y = bus_label_offset.y();
-
-    proto_render::Point stop_label_offset = proto_render_settings.stop_label_offset();
-    render_settings.stop_label_offset.x = stop_label_offset.x();
-    render_settings.stop_label_offset.y = stop_label_offset.y();
-
-    render_settings.stop_label_font_size = proto_render_settings.stop_label_font_size();
-
-    render_settings.underlayer_color = domain::GetColorFromProto(proto_render_settings.underlayer_color());
-    render_settings.underlayer_width = proto_render_settings.underlayer_width();
-
-    for (int i = 0; i < proto_render_settings.color_palette_size(); ++i) {
-        render_settings.color_palette.push_back(domain::GetColorFromProto(proto_render_settings.color_palette(i)));
-    }
-
-    domain::RoutingSettings routing_settings;
-    proto_router::RoutingSettings proto_routing_settings = proto_cat.routing_settings();
-    routing_settings.bus_wait_time = proto_routing_settings.bus_wait_time();
-    routing_settings.bus_velocity = proto_routing_settings.bus_velocity();
-
-    return {std::move(cat), render_settings, routing_settings};
+    return {
+        std::move(cat),
+        renderer::RendererSettingFromProto(proto_cat.render_settings()),
+        domain::RoutingSettingsFromProto(proto_cat.routing_settings())
+    };
 }
-
-
 
 }

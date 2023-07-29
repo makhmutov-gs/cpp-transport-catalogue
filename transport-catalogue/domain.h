@@ -24,7 +24,8 @@ struct RoutingSettings {
     double bus_velocity;
 };
 
-svg::Color GetColorFromProto(const proto_render::Color& proto_color);
+proto_transport::Stop StopToProto(const Stop& s, int32_t id);
+proto_router::RoutingSettings RoutingSettingsToProto(const RoutingSettings& settings);
 
 struct ProtoColorGetter {
     proto_render::Color operator()(std::monostate);
@@ -32,5 +33,8 @@ struct ProtoColorGetter {
     proto_render::Color operator()(const svg::Rgb& rgb);
     proto_render::Color operator()(const svg::Rgba& rgba);
 };
+
+svg::Color GetColorFromProto(const proto_render::Color& proto_color);
+domain::RoutingSettings RoutingSettingsFromProto(const proto_router::RoutingSettings& proto_settings);
 
 }
