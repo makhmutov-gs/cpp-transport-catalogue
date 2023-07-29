@@ -75,4 +75,6 @@ private:
     double CalcRoadRouteLength(const std::vector<const Stop*>& stops) const;
 };
 
+std::optional<TransportCatalogue> FromFile(const std::filesystem::path& path);
+
 }

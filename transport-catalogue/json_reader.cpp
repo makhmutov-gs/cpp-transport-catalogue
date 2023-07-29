@@ -10,6 +10,8 @@ inline const std::string BASE_REQUESTS = "base_requests";
 inline const std::string STAT_REQUESTS = "stat_requests";
 inline const std::string RENDER_SETTINGS = "render_settings";
 inline const std::string ROUTING_SETTINGS = "routing_settings";
+inline const std::string SERIALIZATION_SETTINGS = "serialization_settings";
+
 constexpr double KPH_TO_MPM = 1000.0 / 60.0; // Коэффициент пересчета из км/ч в метры/минута
 
 JsonReader::JsonReader(std::istream& in, bool read_output_queries) {
@@ -63,16 +65,24 @@ void JsonReader::ReadDocument(std::istream& in, bool read_output_queries) {
     }
 
     const auto root_map = doc.GetRoot().AsDict();
-    if (root_map.count(BASE_REQUESTS) == 0 || root_map.count(STAT_REQUESTS) == 0) {
-        throw json::InvalidTypeError("Invalid json input.");
+
+    if (root_map.count(BASE_REQUESTS) != 0) {
+        ReadInputQueries(root_map.at(BASE_REQUESTS).AsArray());
     }
 
-    ReadInputQueries(root_map.at(BASE_REQUESTS).AsArray());
     if (read_output_queries) {
         ReadOutputQueries(root_map.at(STAT_REQUESTS).AsArray());
     }
-    ReadRenderSettings(root_map.at(RENDER_SETTINGS).AsDict());
-    ReadRoutingSettings(root_map.at(ROUTING_SETTINGS).AsDict());
+
+    if (root_map.count(RENDER_SETTINGS) != 0) {
+        ReadRenderSettings(root_map.at(RENDER_SETTINGS).AsDict());
+    }
+
+    if (root_map.count(ROUTING_SETTINGS) != 0) {
+        ReadRoutingSettings(root_map.at(ROUTING_SETTINGS).AsDict());
+    }
+
+    ReadSerializationSettings(root_map.at(SERIALIZATION_SETTINGS).AsDict());
 }
 
 void JsonReader::ReadInputQueries(const json::Array& in_queries) {
@@ -169,12 +179,20 @@ void JsonReader::ReadRoutingSettings(const json::Dict& settings) {
     routing_settings_.bus_velocity = settings.at("bus_velocity").AsDouble() * KPH_TO_MPM;
 }
 
+void JsonReader::ReadSerializationSettings(const json::Dict& settings) {
+    db_name_ = settings.at("file"s).AsString();
+}
+
 renderer::Settings JsonReader::GetRenderSettings() const {
     return render_settings_;
 }
 
 domain::RoutingSettings JsonReader::GetRoutingSettings() const {
     return routing_settings_;
+}
+
+std::string JsonReader::GetDbName() const {
+    return db_name_;
 }
 
 void JsonReader::AddStopQuery(const json::Dict& query) {

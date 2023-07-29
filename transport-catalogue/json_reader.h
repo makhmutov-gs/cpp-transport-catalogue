@@ -20,6 +20,7 @@ public:
     );
     renderer::Settings GetRenderSettings() const;
     domain::RoutingSettings GetRoutingSettings() const;
+    std::string GetDbName() const;
 
 private:
     struct BusQuery {
@@ -46,6 +47,8 @@ private:
         std::variant<std::string, RouteQueryInfo> payload;
     };
 
+    std::string db_name_;
+
     std::vector<OutQuery> out_queries_;
 
     std::vector<Stop> stop_queries_;
@@ -59,6 +62,7 @@ private:
     void ReadOutputQueries(const json::Array& out_queries);
     void ReadRenderSettings(const json::Dict& settings);
     void ReadRoutingSettings(const json::Dict& settings);
+    void ReadSerializationSettings(const json::Dict& settings);
 
     void AddStopQuery(const json::Dict& query);
     void AddBusQuery(const json::Dict& query);

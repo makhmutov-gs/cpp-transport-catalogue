@@ -30,9 +30,10 @@ std::optional<double> TransportCatalogue::GetRoadDistance(
     auto p = std::pair{stopname_to_stop_.at(from), stopname_to_stop_.at(to)};
     if (road_distances_.count(p) == 1) {
         return road_distances_.at(p);
-    } else {
+    } else if (road_distances_.count({p.second, p.first})){
         return road_distances_.at({p.second, p.first});
     }
+    return std::nullopt;
 }
 
 void TransportCatalogue::AddBus(
@@ -123,7 +124,6 @@ void TransportCatalogue::SaveTo(const std::filesystem::path& path) const {
     size_t id = 0;
     for (const auto& s : stops_) {
         stop_to_id[&s] = id;
-        ++id;
 
         proto_transport::Stop proto_stop;
         proto_stop.set_name(s.name);
@@ -136,6 +136,8 @@ void TransportCatalogue::SaveTo(const std::filesystem::path& path) const {
         *proto_stop.mutable_coords() = proto_coords;
 
         *proto_cat.add_stop() = proto_stop;
+
+        ++id;
     }
 
     for (const auto& s_from : stops_) {
@@ -145,14 +147,16 @@ void TransportCatalogue::SaveTo(const std::filesystem::path& path) const {
                 continue;
             }
             int32_t to = static_cast<int32_t>(stop_to_id[&s_to]);
-            double meters = *GetRoadDistance(s_from.name, s_to.name);
+            std::optional<double> meters = GetRoadDistance(s_from.name, s_to.name);
 
-            proto_transport::Distance proto_distance;
-            proto_distance.set_from(from);
-            proto_distance.set_to(to);
-            proto_distance.set_meters(meters);
+            if (meters.has_value()) {
+                proto_transport::Distance proto_distance;
+                proto_distance.set_from(from);
+                proto_distance.set_to(to);
+                proto_distance.set_meters(*meters);
 
-            *proto_cat.add_distance() = proto_distance;
+                *proto_cat.add_distance() = proto_distance;
+            }
         }
     }
 
@@ -165,12 +169,14 @@ void TransportCatalogue::SaveTo(const std::filesystem::path& path) const {
             id = stop_to_id[s_ptr];
             proto_bus.add_stop(static_cast<int32_t>(id));
         }
+
+        *proto_cat.add_bus() = proto_bus;
     }
 
     proto_cat.SerializeToOstream(&out_file);
 }
 
-static std::optional<TransportCatalogue> FromFile(const std::filesystem::path& path) {
+std::optional<TransportCatalogue> FromFile(const std::filesystem::path& path) {
     std::ifstream in_file(path, std::ios::binary);
     proto_transport::TransportCatalogue proto_cat;
     TransportCatalogue cat;
@@ -178,7 +184,7 @@ static std::optional<TransportCatalogue> FromFile(const std::filesystem::path& p
         return std::nullopt;
     }
 
-    std::unordered_map<size_t, std::string_view> id_to_stopname;
+    std::unordered_map<int32_t, std::string> id_to_stopname;
     for (int i = 0; i < proto_cat.stop_size(); ++i) {
         proto_transport::Stop proto_stop = *proto_cat.mutable_stop(i);
 
@@ -189,8 +195,8 @@ static std::optional<TransportCatalogue> FromFile(const std::filesystem::path& p
     for (int i = 0; i < proto_cat.distance_size(); ++i) {
         proto_transport::Distance proto_distance = *proto_cat.mutable_distance(i);
         cat.SetRoadDistance(
-            std::string(id_to_stopname[proto_distance.from()]),
-            std::string(id_to_stopname[proto_distance.to()]),
+            id_to_stopname[proto_distance.from()],
+            id_to_stopname[proto_distance.to()],
             proto_distance.meters()
         );
     }
