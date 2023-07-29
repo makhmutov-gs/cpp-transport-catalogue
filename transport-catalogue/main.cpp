@@ -1,4 +1,3 @@
-#include <iostream>
 #include "transport_catalogue.h"
 #include "json_reader.h"
 #include "map_renderer.h"
@@ -30,9 +29,9 @@ int main(int argc, char* argv[]) {
     if (mode == "make_base"sv) {
         TransportCatalogue cat;
 
-        JsonReader reader(std::cin, false);
-
+        JsonReader reader(std::cin);
         reader.ProcessInQueries(cat);
+
         cat.SaveWithSettings(
             std::filesystem::path(reader.GetDbName()),
             reader.GetRenderSettings(),

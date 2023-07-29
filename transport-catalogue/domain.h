@@ -26,4 +26,11 @@ struct RoutingSettings {
 
 svg::Color GetColorFromProto(const proto_render::Color& proto_color);
 
+struct ProtoColorGetter {
+    proto_render::Color operator()(std::monostate);
+    proto_render::Color operator()(const std::string& str);
+    proto_render::Color operator()(const svg::Rgb& rgb);
+    proto_render::Color operator()(const svg::Rgba& rgba);
+};
+
 }

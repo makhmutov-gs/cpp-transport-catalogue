@@ -117,40 +117,6 @@ double TransportCatalogue::CalcRoadRouteLength(const std::vector<const Stop*>& s
     return result;
 }
 
-struct ProtoColorGetter {
-    proto_render::Color operator()(std::monostate) {
-        proto_render::Color proto_color;
-        proto_color.set_type(proto_render::Color_TYPE::Color_TYPE_NONE);
-        return proto_color;
-    }
-
-    proto_render::Color operator()(const std::string& str) {
-        proto_render::Color proto_color;
-        proto_color.set_type(proto_render::Color_TYPE::Color_TYPE_STRING);
-        proto_color.set_name(str);
-        return proto_color;
-    }
-
-    proto_render::Color operator()(const svg::Rgb& rgb) {
-        proto_render::Color proto_color;
-        proto_color.set_type(proto_render::Color_TYPE::Color_TYPE_RGB);
-        proto_color.set_red(rgb.red);
-        proto_color.set_green(rgb.green);
-        proto_color.set_blue(rgb.blue);
-        return proto_color;
-    }
-
-    proto_render::Color operator()(const svg::Rgba& rgba) {
-        proto_render::Color proto_color;
-        proto_color.set_type(proto_render::Color_TYPE::Color_TYPE_RGBA);
-        proto_color.set_red(rgba.red);
-        proto_color.set_green(rgba.green);
-        proto_color.set_blue(rgba.blue);
-        proto_color.set_opacity(rgba.opacity);
-        return proto_color;
-    }
-};
-
 void TransportCatalogue::SaveWithSettings(
     const std::filesystem::path& path,
     const renderer::Settings& render_settings,
@@ -234,12 +200,12 @@ void TransportCatalogue::SaveWithSettings(
 
     proto_render_settings.set_stop_label_font_size(render_settings.stop_label_font_size);
 
-    *proto_render_settings.mutable_underlayer_color() = std::visit(ProtoColorGetter(), render_settings.underlayer_color);
+    *proto_render_settings.mutable_underlayer_color() = std::visit(domain::ProtoColorGetter(), render_settings.underlayer_color);
 
     proto_render_settings.set_underlayer_width(render_settings.underlayer_width);
 
     for (const auto& c : render_settings.color_palette) {
-        *proto_render_settings.add_color_palette() = std::visit(ProtoColorGetter(), c);
+        *proto_render_settings.add_color_palette() = std::visit(domain::ProtoColorGetter(), c);
     }
 
     proto_router::RoutingSettings proto_routing_settings;

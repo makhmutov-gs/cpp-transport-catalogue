@@ -14,8 +14,8 @@ inline const std::string SERIALIZATION_SETTINGS = "serialization_settings";
 
 constexpr double KPH_TO_MPM = 1000.0 / 60.0; // Коэффициент пересчета из км/ч в метры/минута
 
-JsonReader::JsonReader(std::istream& in, bool read_output_queries) {
-    ReadDocument(in, read_output_queries);
+JsonReader::JsonReader(std::istream& in) {
+    ReadDocument(in);
 }
 
 void JsonReader::ProcessInQueries(TransportCatalogue& cat) {
@@ -57,7 +57,7 @@ void JsonReader::PrintOutQueries(TransportCatalogue& cat, const requests::Reques
     json::Print(json::Document(to_print), out);
 }
 
-void JsonReader::ReadDocument(std::istream& in, bool read_output_queries) {
+void JsonReader::ReadDocument(std::istream& in) {
     json::Document doc = json::Load(in);
 
     if (!doc.GetRoot().IsDict()) {
@@ -70,7 +70,7 @@ void JsonReader::ReadDocument(std::istream& in, bool read_output_queries) {
         ReadInputQueries(root_map.at(BASE_REQUESTS).AsArray());
     }
 
-    if (read_output_queries) {
+    if (root_map.count(STAT_REQUESTS) != 0) {
         ReadOutputQueries(root_map.at(STAT_REQUESTS).AsArray());
     }
 

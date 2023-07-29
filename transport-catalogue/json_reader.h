@@ -10,7 +10,7 @@ namespace catalogue::reader {
 
 class JsonReader {
 public:
-    JsonReader(std::istream& in, bool read_output_queries=true);
+    JsonReader(std::istream& in);
 
     void ProcessInQueries(TransportCatalogue& cat);
     void PrintOutQueries(
@@ -57,7 +57,7 @@ private:
     renderer::Settings render_settings_;
     domain::RoutingSettings routing_settings_;
 
-    void ReadDocument(std::istream& in, bool read_output_queries);
+    void ReadDocument(std::istream& in);
     void ReadInputQueries(const json::Array& in_queries);
     void ReadOutputQueries(const json::Array& out_queries);
     void ReadRenderSettings(const json::Dict& settings);

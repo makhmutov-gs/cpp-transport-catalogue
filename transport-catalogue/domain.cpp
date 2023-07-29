@@ -19,4 +19,36 @@ svg::Color GetColorFromProto(const proto_render::Color& proto_color) {
     }
 }
 
+proto_render::Color ProtoColorGetter::operator()(std::monostate) {
+    proto_render::Color proto_color;
+    proto_color.set_type(proto_render::Color_TYPE::Color_TYPE_NONE);
+    return proto_color;
+}
+
+proto_render::Color ProtoColorGetter::operator()(const std::string& str) {
+    proto_render::Color proto_color;
+    proto_color.set_type(proto_render::Color_TYPE::Color_TYPE_STRING);
+    proto_color.set_name(str);
+    return proto_color;
+}
+
+proto_render::Color ProtoColorGetter::operator()(const svg::Rgb& rgb) {
+    proto_render::Color proto_color;
+    proto_color.set_type(proto_render::Color_TYPE::Color_TYPE_RGB);
+    proto_color.set_red(rgb.red);
+    proto_color.set_green(rgb.green);
+    proto_color.set_blue(rgb.blue);
+    return proto_color;
+}
+
+proto_render::Color ProtoColorGetter::operator()(const svg::Rgba& rgba) {
+    proto_render::Color proto_color;
+    proto_color.set_type(proto_render::Color_TYPE::Color_TYPE_RGBA);
+    proto_color.set_red(rgba.red);
+    proto_color.set_green(rgba.green);
+    proto_color.set_blue(rgba.blue);
+    proto_color.set_opacity(rgba.opacity);
+    return proto_color;
+}
+
 }
