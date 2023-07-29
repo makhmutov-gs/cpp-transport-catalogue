@@ -33,15 +33,19 @@ int main(int argc, char* argv[]) {
         JsonReader reader(std::cin, false);
 
         reader.ProcessInQueries(cat);
-        cat.SaveTo(std::filesystem::path(reader.GetDbName()), reader.GetRenderSettings());
+        cat.SaveTo(
+            std::filesystem::path(reader.GetDbName()),
+            reader.GetRenderSettings(),
+            reader.GetRoutingSettings()
+        );
 
     } else if (mode == "process_requests"sv) {
 
         JsonReader reader(std::cin);
-        auto [cat, renderer_settings] = FromFile(std::filesystem::path(reader.GetDbName()));
+        auto [cat, renderer_settings, routings_settings] = FromFile(std::filesystem::path(reader.GetDbName()));
 
         MapRenderer renderer(renderer_settings);
-        RequestHandler handler(cat, renderer, {6, 40 * 1000 / 60});
+        RequestHandler handler(cat, renderer, routings_settings);
 
         reader.PrintOutQueries(cat, handler, std::cout);
 

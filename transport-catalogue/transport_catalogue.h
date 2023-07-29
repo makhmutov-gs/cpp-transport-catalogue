@@ -62,7 +62,11 @@ public:
 
     std::optional<std::set<std::string_view>> GetBusesByStop(const std::string& name) const;
 
-    void SaveTo(const std::filesystem::path& path, const renderer::Settings& settings) const;
+    void SaveTo(
+        const std::filesystem::path& path,
+        const renderer::Settings& render_settings,
+        const domain::RoutingSettings& routing_settings
+    ) const;
 
 private:
     std::deque<Stop> stops_;
@@ -77,6 +81,6 @@ private:
     double CalcRoadRouteLength(const std::vector<const Stop*>& stops) const;
 };
 
-std::tuple<TransportCatalogue, renderer::Settings> FromFile(const std::filesystem::path& path);
+std::tuple<TransportCatalogue, renderer::Settings, domain::RoutingSettings> FromFile(const std::filesystem::path& path);
 
 }
