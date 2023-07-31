@@ -14,7 +14,7 @@ void SaveWithSettings(
     proto_transport::RoutesInfo proto_routes_info;
     std::unordered_map<const Stop*, int32_t> stop_to_id;
 
-    auto stops = cat.GetStops();
+    const auto& stops = cat.GetStops();
 
     int32_t id = 0;
     for (const auto& s : stops) {
