@@ -9,7 +9,7 @@ find_package(Threads REQUIRED)
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS transport_catalogue.proto map_renderer.proto transport_router.proto)
 
 set(TRANSPORT_CATALOGUE_FILES
-    domain.cpp domain.h geo.cpp geo.h graph.h json_builder.cpp json_builder.h
+    domain.h geo.cpp geo.h graph.h json_builder.cpp json_builder.h
     json_reader.cpp json_reader.h json.cpp json.h main.cpp
     serialization.cpp serialization.h map_renderer.cpp map_renderer.h
     ranges.h request_handler.cpp request_handler.h router.h svg.cpp svg.h

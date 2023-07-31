@@ -114,4 +114,12 @@ double TransportCatalogue::CalcRoadRouteLength(const std::vector<const Stop*>& s
     return result;
 }
 
+const std::deque<Stop>& TransportCatalogue::GetStops() const {
+    return stops_;
+}
+
+const std::deque<Bus>& TransportCatalogue::GetBuses() const {
+    return buses_;
+}
+
 }

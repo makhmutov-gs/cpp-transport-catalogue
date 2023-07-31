@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
         JsonReader reader(std::cin);
         reader.ProcessInQueries(cat);
 
-        SaveWithSettings(
+        SaveToFile(
             std::filesystem::path(reader.GetDbName()),
             cat,
             reader.GetRenderSettings(),

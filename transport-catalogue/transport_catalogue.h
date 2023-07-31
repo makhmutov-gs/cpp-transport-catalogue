@@ -52,13 +52,8 @@ public:
         bool is_roundtrip
     );
 
-    const std::deque<Stop>& GetStops() const {
-        return stops_;
-    }
-
-    const std::deque<Bus>& GetBuses() const {
-        return buses_;
-    }
+    const std::deque<Stop>& GetStops() const;
+    const std::deque<Bus>& GetBuses() const;
 
     std::optional<BusInfo> GetBusInfo(const std::string& name);
 
