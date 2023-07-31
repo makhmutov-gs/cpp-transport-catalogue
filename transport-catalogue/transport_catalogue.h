@@ -8,10 +8,8 @@
 #include <utility>
 #include <set>
 #include <optional>
-#include <filesystem>
 
 #include "domain.h"
-#include "map_renderer.h"
 
 namespace catalogue {
 
@@ -54,6 +52,10 @@ public:
         bool is_roundtrip
     );
 
+    const std::deque<Stop>& GetStops() const {
+        return stops_;
+    }
+
     const std::deque<Bus>& GetBuses() const {
         return buses_;
     }
@@ -61,12 +63,6 @@ public:
     std::optional<BusInfo> GetBusInfo(const std::string& name);
 
     std::optional<std::set<std::string_view>> GetBusesByStop(const std::string& name) const;
-
-    void SaveWithSettings(
-        const std::filesystem::path& path,
-        const renderer::Settings& render_settings,
-        const domain::RoutingSettings& routing_settings
-    ) const;
 
 private:
     std::deque<Stop> stops_;
@@ -80,7 +76,5 @@ private:
     double CalcGeoRouteLength(const std::vector<const Stop*>& stops);
     double CalcRoadRouteLength(const std::vector<const Stop*>& stops) const;
 };
-
-std::tuple<TransportCatalogue, renderer::Settings, domain::RoutingSettings> FromFile(const std::filesystem::path& path);
 
 }

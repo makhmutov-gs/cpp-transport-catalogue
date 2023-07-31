@@ -28,11 +28,14 @@ message Distance {
     double meters = 3;
 }
 
-message TransportCatalogue {
+message RoutesInfo {
     repeated Bus bus = 1;
     repeated Stop stop = 2;
     repeated Distance distance = 3;
-    proto_render.RendererSettings render_settings = 4;
-    proto_router.RoutingSettings routing_settings = 5;
+}
 
+message TransportCatalogue {
+    RoutesInfo routes_info  = 1;
+    proto_render.RendererSettings render_settings = 2;
+    proto_router.RoutingSettings routing_settings = 3;
 }

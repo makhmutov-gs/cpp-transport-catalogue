@@ -29,9 +29,6 @@ struct Settings {
     std::vector<svg::Color> color_palette;
 };
 
-proto_render::RendererSettings RendererSettingsToProto(const Settings& settings);
-Settings RendererSettingFromProto(const proto_render::RendererSettings& proto_settings);
-
 inline const double EPSILON = 1e-6;
 inline bool IsZero(double value) {
     return std::abs(value) < EPSILON;

@@ -1,7 +1,4 @@
 #include "transport_catalogue.h"
-#include "map_renderer.h"
-#include <fstream>
-#include <transport_catalogue.pb.h>
 
 namespace catalogue {
 
@@ -115,107 +112,6 @@ double TransportCatalogue::CalcRoadRouteLength(const std::vector<const Stop*>& s
 
     }
     return result;
-}
-
-void TransportCatalogue::SaveWithSettings(
-    const std::filesystem::path& path,
-    const renderer::Settings& render_settings,
-    const domain::RoutingSettings& routing_settings
-) const {
-    std::ofstream out_file(path, std::ios::binary);
-
-    proto_transport::TransportCatalogue proto_cat;
-    std::unordered_map<const Stop*, int32_t> stop_to_id;
-
-    int32_t id = 0;
-    for (const auto& s : stops_) {
-        stop_to_id[&s] = id;
-        *proto_cat.add_stop() = domain::StopToProto(s, id);
-        ++id;
-    }
-
-    for (const auto& s_from : stops_) {
-        int32_t from = stop_to_id[&s_from];
-        for (const auto& s_to : stops_) {
-            if (&s_from == &s_to) {
-                continue;
-            }
-            int32_t to = stop_to_id[&s_to];
-            std::optional<double> meters = GetRoadDistance(s_from.name, s_to.name);
-
-            if (!meters.has_value()) {
-                continue;
-            }
-
-            proto_transport::Distance proto_distance;
-            proto_distance.set_from(from);
-            proto_distance.set_to(to);
-            proto_distance.set_meters(*meters);
-
-            *proto_cat.add_distance() = proto_distance;
-        }
-    }
-
-    for (const auto& b : buses_) {
-        proto_transport::Bus proto_bus;
-        proto_bus.set_name(b.name);
-        proto_bus.set_is_roundtrip(b.is_roundtrip);
-
-        for (const auto s_ptr : b.stops) {
-            id = stop_to_id[s_ptr];
-            proto_bus.add_stop(id);
-        }
-
-        *proto_cat.add_bus() = proto_bus;
-    }
-
-    *proto_cat.mutable_render_settings() = renderer::RendererSettingsToProto(render_settings);
-    *proto_cat.mutable_routing_settings() = domain::RoutingSettingsToProto(routing_settings);
-
-    proto_cat.SerializeToOstream(&out_file);
-}
-
-std::tuple<TransportCatalogue, renderer::Settings, domain::RoutingSettings> FromFile(const std::filesystem::path& path) {
-    std::ifstream in_file(path, std::ios::binary);
-
-    proto_transport::TransportCatalogue proto_cat;
-    TransportCatalogue cat;
-
-    proto_cat.ParseFromIstream(&in_file);
-
-    std::unordered_map<int32_t, std::string> id_to_stopname;
-    for (int i = 0; i < proto_cat.stop_size(); ++i) {
-        proto_transport::Stop proto_stop = *proto_cat.mutable_stop(i);
-
-        cat.AddStop(Stop{proto_stop.name(), {proto_stop.coords().lat(), proto_stop.coords().lng()}});
-        id_to_stopname[proto_stop.id()] = proto_stop.name();
-    }
-
-    for (int i = 0; i < proto_cat.distance_size(); ++i) {
-        proto_transport::Distance proto_distance = *proto_cat.mutable_distance(i);
-        cat.SetRoadDistance(
-            id_to_stopname[proto_distance.from()],
-            id_to_stopname[proto_distance.to()],
-            proto_distance.meters()
-        );
-    }
-
-    for (int i = 0; i < proto_cat.bus_size(); ++i) {
-        proto_transport::Bus proto_bus = *proto_cat.mutable_bus(i);
-
-        std::vector<std::string> stops;
-        for (int j = 0; j < proto_bus.stop_size(); ++j) {
-            int id = proto_bus.stop(j);
-            stops.push_back(id_to_stopname[id]);
-        }
-        cat.AddBus(proto_bus.name(), stops, proto_bus.is_roundtrip());
-    }
-
-    return {
-        std::move(cat),
-        renderer::RendererSettingFromProto(proto_cat.render_settings()),
-        domain::RoutingSettingsFromProto(proto_cat.routing_settings())
-    };
 }
 
 }
