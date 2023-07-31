@@ -28,20 +28,20 @@ int main(int argc, char* argv[]) {
 
     const std::string_view mode(argv[1]);
 
-    // if (mode == "make_base"sv) {
-    //     TransportCatalogue cat;
+    if (mode == "make_base"sv) {
+        TransportCatalogue cat;
 
-    //     JsonReader reader(std::cin);
-    //     reader.ProcessInQueries(cat);
+        JsonReader reader(std::cin);
+        reader.ProcessInQueries(cat);
 
-    //     SaveWithSettings(
-    //         std::filesystem::path(reader.GetDbName()),
-    //         cat,
-    //         reader.GetRenderSettings(),
-    //         reader.GetRoutingSettings()
-    //     );
+        SaveWithSettings(
+            std::filesystem::path(reader.GetDbName()),
+            cat,
+            reader.GetRenderSettings(),
+            reader.GetRoutingSettings()
+        );
 
-    // } else if (mode == "process_requests"sv) {
+    } else if (mode == "process_requests"sv) {
         JsonReader reader(std::cin);
 
         auto [cat, renderer_settings, routings_settings] = FromFile(std::filesystem::path(reader.GetDbName()));
@@ -51,8 +51,8 @@ int main(int argc, char* argv[]) {
 
         reader.PrintOutQueries(cat, handler, std::cout);
 
-    // } else {
-    //     PrintUsage();
-    //     return 1;
-    // }
+    } else {
+        PrintUsage();
+        return 1;
+    }
 }
